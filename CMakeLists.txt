@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.28)
 
 project (PersonalProjectKnit)
 
-set (CMAKE_CXX_STANDARD 20)
+set (CMAKE_CXX_STANDARD 23)
 
 # GLFW dependency
 set (GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -18,8 +18,12 @@ add_library (eigen INTERFACE)
 target_include_directories (eigen INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/eigen")
 
 # Executable
-add_executable (visualizer "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+add_executable (visualizer 
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/mesh.cpp"
+    )
 target_include_directories (visualizer PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries (visualizer glfw)
 target_link_libraries (visualizer glad)
 target_link_libraries (visualizer eigen)
+target_compile_definitions (visualizer PUBLIC SOURCEDIR="${CMAKE_CURRENT_SOURCE_DIR}")

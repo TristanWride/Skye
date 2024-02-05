@@ -1,31 +1,20 @@
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 #include <cstdint>
+#include <vector>
+#include <string>
 
 using EdgeId = std::uint64_t;
 using VertexId = std::uint64_t;
 using FaceId = std::uint64_t;
-
-struct Edge {
-    EdgeId id;
-    EdgeId next;
-    EdgeId prev;
-    EdgeId twin;
-    FaceId face;
-    VertexId vertex;
-};
-
-struct Vertex {
-    VertexId id;
-    EdgeId edge;
-};
-
-struct Face {
-    FaceId id;
-    EdgeId edge;
-};
+using Orientation = std::int32_t;
 
 struct Mesh {
-    Eigen::ArrayX3d vertices;
-    Eigen::ArrayX3d normals;
+    Eigen::ArrayX3d vertexPositions;
+    Eigen::ArrayX3d faceNormals;
+    Eigen::SparseMatrix<Orientation> edges;
+    Eigen::SparseMatrix<Orientation> faces;
+
+    static auto ReadObj(const std::string& filePath) -> Mesh;
 };
