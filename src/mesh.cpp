@@ -1,16 +1,14 @@
+#include "debugutils.h"
 #include "mesh.h"
 
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <format>
 #include <algorithm>
+#include <fstream>
 #include <iterator>
-#include <tuple>
 #include <ranges>
+#include <vector>
 
 auto Mesh::ReadObj(const std::string& filePath) -> Mesh {
+    DebugMessage("INFO", std::format("Reading object file \"{}\"", filePath));
     auto inputFile = std::ifstream(filePath);
     auto vertexPositions = std::vector<Eigen::Vector3d>{};
     auto normals = std::vector<Eigen::Vector3d>{};
@@ -70,9 +68,9 @@ auto Mesh::ReadObj(const std::string& filePath) -> Mesh {
                 faceNormals.emplace_back().begin()
             );
         } else {
-            std::cout 
-                << "[WARN]: Encountered unknown row type " 
-                << rowType << '\n';
+            DebugMessage("WARN", 
+                std::format("Encountered unknown row type {}", rowType
+            ));
         }
     }
 
@@ -92,9 +90,10 @@ auto Mesh::ReadObj(const std::string& filePath) -> Mesh {
         for (auto edge : face | std::views::adjacent<2>) {
             auto from = std::get<0>(edge);
             auto to = std::get<1>(edge);
-            if (from == to) std::cout 
-                << "[WARN]: Reflexive edge detected at face " << faceId << ": " 
-                << from << " -> " << to << '\n';
+            if (from == to) DebugMessage("WARN", std::format(
+                    "Reflexive edge detected at face {}: {} -> {}", faceId, 
+                    from + 1, to + 1
+                ));
             auto edgeFaceOrientation = 1;
             if (from > to) {
                 std::swap(from, to);
@@ -109,6 +108,11 @@ auto Mesh::ReadObj(const std::string& filePath) -> Mesh {
     }
 
     const auto numEdges = edgeId;
+
+    DebugMessage("INFO", std::format(
+        "Found {} vertices, {} edges, {} faces", 
+        numVertices, numEdges, numFaces
+    ));
 
     mesh.edges.resize(numEdges, numVertices);
     mesh.faces.resize(numFaces, numEdges);

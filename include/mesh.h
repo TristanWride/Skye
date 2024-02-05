@@ -1,9 +1,11 @@
+#pragma once
+
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
 #include <cstdint>
-#include <vector>
 #include <string>
+#include <vector>
 
 using EdgeId = std::uint64_t;
 using VertexId = std::uint64_t;
