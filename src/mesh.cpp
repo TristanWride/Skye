@@ -39,14 +39,10 @@ auto Mesh::ReadObj(const std::string& filePath) -> Mesh {
                 normals.emplace_back().begin()
             );
         } else if (rowType == "f") {
-            auto readFaceVertices = [](const std::string& entry) 
-                    -> std::tuple<VertexId, VertexId> {
+            auto readFaceVertices = [](const std::string& entry) -> std::tuple<VertexId, VertexId> {
                 const auto ed = std::find(entry.cbegin(), entry.cend(), '/');
                 auto vIx = std::stoul(std::string(entry.cbegin(), ed)) - 1;
-                const auto bg = std::find_if(
-                    ed, entry.cend(), 
-                    [](auto c){ return c != '/'; }
-                );
+                const auto bg = std::find_if( ed, entry.cend(), [](auto c){ return c != '/'; });
                 auto vnIx = std::stoul(std::string(bg, entry.cend())) - 1;
                 return {vIx, vnIx};
             };
@@ -68,9 +64,7 @@ auto Mesh::ReadObj(const std::string& filePath) -> Mesh {
                 faceNormals.emplace_back().begin()
             );
         } else {
-            DebugMessage("WARN", 
-                std::format("Encountered unknown row type {}", rowType
-            ));
+            DebugMessage("WARN", std::format("Encountered unknown row type {}", rowType));
         }
     }
 
@@ -90,10 +84,7 @@ auto Mesh::ReadObj(const std::string& filePath) -> Mesh {
         for (auto edge : face | std::views::adjacent<2>) {
             auto from = std::get<0>(edge);
             auto to = std::get<1>(edge);
-            if (from == to) DebugMessage("WARN", std::format(
-                    "Reflexive edge detected at face {}: {} -> {}", faceId, 
-                    from + 1, to + 1
-                ));
+            if (from == to) DebugMessage("WARN", std::format("Reflexive edge detected at face {}: {} -> {}", faceId, from + 1, to + 1));
             auto edgeFaceOrientation = 1;
             if (from > to) {
                 std::swap(from, to);
@@ -109,10 +100,7 @@ auto Mesh::ReadObj(const std::string& filePath) -> Mesh {
 
     const auto numEdges = edgeId;
 
-    DebugMessage("INFO", std::format(
-        "Found {} vertices, {} edges, {} faces", 
-        numVertices, numEdges, numFaces
-    ));
+    DebugMessage("INFO", std::format( "Found {} vertices, {} edges, {} faces", numVertices, numEdges, numFaces));
 
     mesh.edges.resize(numEdges, numVertices);
     mesh.faces.resize(numFaces, numEdges);

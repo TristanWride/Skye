@@ -21,6 +21,7 @@ target_include_directories (eigen INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/depende
 add_executable (visualizer 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mesh.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/window.cpp"
     )
 target_include_directories (visualizer PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries (visualizer glfw)
