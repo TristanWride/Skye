@@ -3,17 +3,17 @@
 
 #include <algorithm>
 #include <fstream>
-#include <iterator>
 #include <ranges>
-#include <vector>
+#include <concepts>
 
-auto Mesh::ReadObj(const std::string& filePath) -> Mesh {
+auto Mesh::ReadObj(const char* filePath) -> Mesh {
     DebugMessage("INFO", std::format("Reading object file \"{}\"", filePath));
     auto inputFile = std::ifstream(filePath);
-    auto vertexPositions = std::vector<Eigen::Vector3d>{};
-    auto normals = std::vector<Eigen::Vector3d>{};
-    auto faceNormals = std::vector<Eigen::Vector3d>{};
-    auto faces = std::vector<std::vector<VertexId>>{};
+    auto mesh = Mesh{};
+
+    auto vertices = std::vector<Eigen::Vector3<Mesh::ScalarType>>{};
+    auto normals = std::vector<Eigen::Vector3<Mesh::ScalarType>>{};
+    auto faceNormals = std::vector<Eigen::Vector3<Mesh::ScalarType>>{};
 
     // Read data from file into std::vectors
     for (std::string line; std::getline(inputFile, line); ){
@@ -27,104 +27,51 @@ auto Mesh::ReadObj(const std::string& filePath) -> Mesh {
         } else if (rowType == "s") {
             continue;
         } else if (rowType == "v") {
-            std::copy(
-                std::istream_iterator<double>(iss),
-                std::istream_iterator<double>(),
-                vertexPositions.emplace_back().begin()
+            std::ranges::copy(
+                std::ranges::istream_view<Mesh::ScalarType>(iss),
+                vertices.emplace_back().begin()
             );
         } else if (rowType == "vn") {
-            std::copy(
-                std::istream_iterator<double>(iss),
-                std::istream_iterator<double>(),
+            std::ranges::copy(
+                std::ranges::istream_view<Mesh::ScalarType>(iss),
                 normals.emplace_back().begin()
             );
         } else if (rowType == "f") {
-            auto readFaceVertices = [](const std::string& entry) -> std::tuple<VertexId, VertexId> {
-                const auto ed = std::find(entry.cbegin(), entry.cend(), '/');
-                auto vIx = std::stoul(std::string(entry.cbegin(), ed)) - 1;
-                const auto bg = std::find_if( ed, entry.cend(), [](auto c){ return c != '/'; });
-                auto vnIx = std::stoul(std::string(bg, entry.cend())) - 1;
-                return {vIx, vnIx};
-            };
+            auto faceData = std::ranges::istream_view<std::string>(iss)
+            | std::views::transform([](const auto& entry) -> std::tuple<VertexId, std::uint64_t> {
+                auto vertexEnd = std::ranges::find(entry, '/');
+                auto normalBegin = std::find_if(vertexEnd, entry.cend(), [](const auto& c) { return c != '/'; });
+                return {
+                    std::stoul(std::string(entry.begin(), vertexEnd)) - 1,
+                    std::stoul(std::string(normalBegin, entry.end())) - 1
+                };
+            }) | std::ranges::to<std::vector>();
 
-            auto faceData = std::vector<std::tuple<VertexId, VertexId>>{};
-            std::transform(
-                std::istream_iterator<std::string>(iss),
-                std::istream_iterator<std::string>(),
-                std::back_inserter(faceData),
-                readFaceVertices
-            );
             std::ranges::copy(
                 faceData | std::views::elements<0>,
-                std::back_inserter(faces.emplace_back())
+                std::back_inserter(mesh.faces.emplace_back())
             );
-            const auto& normal = normals[std::get<1>(faceData[0])];
-            std::ranges::copy(
-                normal,
-                faceNormals.emplace_back().begin()
-            );
+
+            faceNormals.emplace_back(normals[std::get<1>(faceData.front())]);
         } else {
             DebugMessage("WARN", std::format("Encountered unknown row type {}", rowType));
         }
     }
 
-    auto mesh = Mesh{};
+    mesh.vertices.resize(vertices.size(), Eigen::NoChange);
+    mesh.faceNormals.resize(faceNormals.size(), Eigen::NoChange);
 
-    const auto numVertices = vertexPositions.size();
-    const auto numFaces = faces.size();
+    DebugMessage("INFO", std::format("Found {} faces and {} vertices", mesh.faces.size(), mesh.vertices.rows()));
 
-    auto edgeTriplets 
-        = std::vector<Eigen::Triplet<Orientation>>{};
-    auto faceTriplets 
-        = std::vector<Eigen::Triplet<Orientation>>{};
-
-    auto edgeId = 0;
-    for (auto [faceId, face] : faces | std::views::enumerate) {
-        face.emplace_back(face.front());
-        for (auto edge : face | std::views::adjacent<2>) {
-            auto from = std::get<0>(edge);
-            auto to = std::get<1>(edge);
-            if (from == to) DebugMessage("WARN", std::format("Reflexive edge detected at face {}: {} -> {}", faceId, from + 1, to + 1));
-            auto edgeFaceOrientation = 1;
-            if (from > to) {
-                std::swap(from, to);
-                edgeFaceOrientation = -1;
-            }
-            edgeTriplets.emplace_back(edgeId, from, -1);
-            edgeTriplets.emplace_back(edgeId, to, 1);
-            faceTriplets.emplace_back(faceId, edgeId, edgeFaceOrientation);
-
-            ++edgeId;
-        }
-    }
-
-    const auto numEdges = edgeId;
-
-    DebugMessage("INFO", std::format( "Found {} vertices, {} edges, {} faces", numVertices, numEdges, numFaces));
-
-    mesh.edges.resize(numEdges, numVertices);
-    mesh.faces.resize(numFaces, numEdges);
-
-    mesh.edges.setFromTriplets(
-        edgeTriplets.begin(), 
-        edgeTriplets.end(), 
-        [](auto&& a, auto&& b) { return std::forward<decltype(b)>(b); }
-    );
-    mesh.faces.setFromTriplets(
-        faceTriplets.begin(), 
-        faceTriplets.end(), 
-        [](auto&& a, auto&& b) { return std::forward<decltype(b)>(b); }
-    );
-
-    mesh.vertexPositions.resize(vertexPositions.size(), 3);
     std::copy(
-        vertexPositions.begin(), vertexPositions.end(),
-        mesh.vertexPositions.rowwise().begin()
+        vertices.begin(),
+        vertices.end(),
+        mesh.vertices.rowwise().begin()
     );
 
-    mesh.faceNormals.resize(faceNormals.size(), 3);
     std::copy(
-        faceNormals.begin(), faceNormals.end(),
+        faceNormals.begin(),
+        faceNormals.end(),
         mesh.faceNormals.rowwise().begin()
     );
 

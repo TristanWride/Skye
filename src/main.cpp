@@ -41,7 +41,6 @@ auto main() -> int {
     {
         auto mesh = Mesh::ReadObj(SOURCEDIR "/data/tris.obj");
         auto window = Window();
-
         gladLoadGL();
 
         while (!glfwWindowShouldClose(window.window)) {
