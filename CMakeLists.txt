@@ -22,9 +22,12 @@ add_executable (visualizer
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mesh.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/window.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/shader.cpp"
     )
 target_include_directories (visualizer PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries (visualizer glfw)
 target_link_libraries (visualizer glad)
 target_link_libraries (visualizer eigen)
-target_compile_definitions (visualizer PUBLIC SOURCEDIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+target_compile_definitions (visualizer PUBLIC DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data/")
+target_compile_definitions (visualizer PUBLIC SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader/")

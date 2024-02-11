@@ -23,3 +23,18 @@ auto DebugMessage(S&& debugLevel, T&& message) -> void {
         // Do nothing
     }
 }
+
+template <class S, class T>
+auto ThrowMessage(S&& debugLevel, T&& message) -> void {
+    if constexpr (DebugRunning) {
+        std::print(
+            "[{:<7}]: {}\n", 
+            std::forward<S>(debugLevel), 
+            std::forward<T>(message)
+        );
+    } else {
+        // Do nothing
+    }
+
+    throw std::runtime_error("CRASHED");
+}
