@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "debugutils.h"
-#include "mesh.h"
+#include "meshcomponent.h"
 #include "window.h"
 #include "shader.h"
 

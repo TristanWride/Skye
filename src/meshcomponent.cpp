@@ -1,5 +1,5 @@
+#include "meshcomponent.h"
 #include "debugutils.h"
-#include "mesh.h"
 
 #include <algorithm>
 #include <fstream>
