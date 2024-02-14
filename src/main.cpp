@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "debugutils.h"
+#include "ecsmanager.h"
 #include "meshcomponent.h"
 #include "window.h"
 #include "shader.h"
@@ -33,8 +34,6 @@ auto main() -> int {
         }
     }; 
     auto env = Environment{};
-
-    auto mesh = Mesh::ReadObj(DATA_DIR "tris.obj");
     auto window = Window();
 
     if (!gladLoadGL()) {
@@ -78,6 +77,10 @@ auto main() -> int {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    auto coreManager = ECSManager<MeshComponent>{};
+
+    auto entity = coreManager.FreshEntity();
 
     while (!glfwWindowShouldClose(window.window)) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

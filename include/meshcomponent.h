@@ -1,5 +1,8 @@
 #pragma once
 
+#include "debugutils.h"
+#include "opaquetypes.h"
+
 #include <Eigen/Core>
 
 #include <cstdint>
@@ -13,11 +16,20 @@ struct Mesh {
 
     Eigen::ArrayX3<ScalarType> vertices;
     Eigen::ArrayX3<ScalarType> faceNormals;
-    std::vector<std::vector<VertexId>> faces;
+    Eigen::ArrayX3<VertexId> faces;
 
     static auto ReadObj(const char* filePath) -> Mesh;
 };
 
 struct MeshComponent {
     Mesh mesh{};
+};
+
+struct MeshComponentManager {
+    using ComponentId = GenericId;
+    using ComponentType = MeshComponent;
+
+    decltype(auto) AllEntitiesAndComponents(this auto&& self) {
+        return std::vector<std::pair<EntityId, MeshComponent&>>{};
+    }
 };

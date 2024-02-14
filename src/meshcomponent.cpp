@@ -14,6 +14,7 @@ auto Mesh::ReadObj(const char* filePath) -> Mesh {
     auto vertices = std::vector<Eigen::Vector3<Mesh::ScalarType>>{};
     auto normals = std::vector<Eigen::Vector3<Mesh::ScalarType>>{};
     auto faceNormals = std::vector<Eigen::Vector3<Mesh::ScalarType>>{};
+    auto faces = std::vector<Eigen::Vector3<Mesh::VertexId>>{};
 
     // Read data from file into std::vectors
     for (std::string line; std::getline(inputFile, line); ){
@@ -47,9 +48,11 @@ auto Mesh::ReadObj(const char* filePath) -> Mesh {
                 };
             }) | std::ranges::to<std::vector>();
 
+            if (faceData.size() > 3) ThrowMessage("ERROR", "Non-triangle faces not supported");
+
             std::ranges::copy(
                 faceData | std::views::elements<0>,
-                std::back_inserter(mesh.faces.emplace_back())
+                faces.emplace_back().begin()
             );
 
             faceNormals.emplace_back(normals[std::get<1>(faceData.front())]);
@@ -60,8 +63,9 @@ auto Mesh::ReadObj(const char* filePath) -> Mesh {
 
     mesh.vertices.resize(vertices.size(), Eigen::NoChange);
     mesh.faceNormals.resize(faceNormals.size(), Eigen::NoChange);
+    mesh.faces.resize(faces.size(), Eigen::NoChange);
 
-    DebugMessage("INFO", std::format("Found {} faces and {} vertices", mesh.faces.size(), mesh.vertices.rows()));
+    DebugMessage("INFO", std::format("Found {} faces and {} vertices", mesh.faces.rows(), mesh.vertices.rows()));
 
     std::copy(
         vertices.begin(),
@@ -73,6 +77,12 @@ auto Mesh::ReadObj(const char* filePath) -> Mesh {
         faceNormals.begin(),
         faceNormals.end(),
         mesh.faceNormals.rowwise().begin()
+    );
+
+    std::copy(
+        faces.begin(),
+        faces.end(),
+        mesh.faces.rowwise().begin()
     );
 
     return mesh;

@@ -18,12 +18,13 @@ add_library (eigen INTERFACE)
 target_include_directories (eigen INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/eigen")
 
 # Executable
-add_executable (visualizer 
+add_executable (visualizer)
+
+target_sources (visualizer PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/meshcomponent.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/window.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/shader.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/ecsmanager.cpp"
 )
 
 target_include_directories (visualizer PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
