@@ -1,8 +1,5 @@
 #pragma once
 
-#include "debugutils.h"
-#include "opaquetypes.h"
-
 #include <Eigen/Core>
 
 #include <cstdint>
@@ -23,13 +20,4 @@ struct Mesh {
 
 struct MeshComponent {
     Mesh mesh{};
-};
-
-struct MeshComponentManager {
-    using ComponentId = GenericId;
-    using ComponentType = MeshComponent;
-
-    decltype(auto) AllEntitiesAndComponents(this auto&& self) {
-        return std::vector<std::pair<EntityId, MeshComponent&>>{};
-    }
 };

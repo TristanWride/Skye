@@ -13,10 +13,8 @@ Window::Window() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     window = glfwCreateWindow(1600, 900, "Project", NULL, NULL);
-    if (!window) {
-        ThrowMessage("ERROR", "Failed to create window");
-        return;
-    }
+
+    if (!window) ThrowMessage("ERROR", "Failed to create window");
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, &FramBufferSizeCallback);

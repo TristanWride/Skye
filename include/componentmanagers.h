@@ -1,35 +1,19 @@
 #pragma once
 
-#include "debugutils.h"
-#include "opaquetypes.h"
-
-#include "meshcomponent.h"
-
+#include <concepts>
 #include <cstdint>
-#include <utility>
-#include <unordered_map>
-#include <vector>
-#include <ranges>
 #include <type_traits>
 
-template <typename ComponentType> 
-struct FindComponentManager;
+using EntityId = std::uint32_t;
 
-template <>
-struct FindComponentManager<MeshComponent> {
-    using ManagerType = MeshComponentManager;
+template <typename CompM>
+concept ComponentManager = requires {
+    typename CompM::ComponentType;
 };
 
-template <typename ComponentManagerType>
-concept ComponentManager = requires {
-     typename ComponentManagerType::ComponentType;
-} && std::is_same_v<
-    typename FindComponentManager<typename ComponentManagerType::ComponentType>::ManagerType, 
-    ComponentManagerType
-> && requires (ComponentManagerType cm) {
-    std::ranges::range<decltype(cm.AllEntitiesAndComponents())>;
-    { cm.AllEntitiesAndComponents().begin()->first } -> std::convertible_to<EntityId>;
-    { cm.AllEntitiesAndComponents().begin()->second } -> std::convertible_to<typename ComponentManagerType::ComponentType>;
-} && requires (ComponentManagerType cm, EntityId entityId) {
-    { cm.GetComponent(entityId) } -> std::convertible_to<typename ComponentManagerType::ComponentType>;
+template <typename CompM, typename Comp>
+concept ComponentManagerFor = ComponentManager<CompM> 
+    && std::is_same_v<typename CompM::ComponentType, Comp> 
+    && requires (CompM m, EntityId id) {
+        { m.Get(id) } -> std::convertible_to<Comp>;
 };

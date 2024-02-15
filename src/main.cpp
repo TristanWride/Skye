@@ -4,11 +4,11 @@
 
 #include "debugutils.h"
 #include "ecsmanager.h"
-#include "meshcomponent.h"
 #include "window.h"
-#include "shader.h"
 
 #include <format>
+#include <string>
+#include <unordered_map>
 
 auto ErrorCallback(int error, const char* description) -> void {
     DebugMessage("ERROR", std::format("error code {}: {}", error, description));
@@ -23,75 +23,58 @@ auto GlobalCleanup() -> void {
     glfwTerminate();
 }
 
+template <typename T>
+struct BasicCompManager {
+    using ComponentType = T;
+    std::unordered_map<EntityId, T> map;
+
+    template <typename... Args>
+    auto New(EntityId id, Args&&... args) {
+        map.try_emplace(id, std::forward<Args>(args)...);
+    }
+
+    decltype(auto) Get(this auto&& self, EntityId id) {
+        return std::forward<decltype(self)>(self).map.at(id);
+    }
+};
+
 auto main() -> int {
     struct Environment {
-        Environment() {
-            GlobalSetup();
-        }
-
-        ~Environment() {
-            GlobalCleanup();
-        }
+        Environment() { GlobalSetup(); }
+        ~Environment() { GlobalCleanup(); }
     }; 
+
     auto env = Environment{};
     auto window = Window();
 
-    if (!gladLoadGL()) {
-        ThrowMessage("ERROR", "Failed to initialise GLAD");
+    if (!gladLoadGL()) ThrowMessage("ERROR", "Failed to initialise GLAD");
+
+    auto ecs = ECSManager<
+        BasicCompManager<int>, 
+        BasicCompManager<double>, 
+        BasicCompManager<std::string>,
+        BasicCompManager<bool>
+    >{};
+
+    for (auto i = 0; i < 20; ++i) {
+        auto ent = ecs.NewEntity().value();
+        if (i % 2 == 0) ecs.NewComponent<int>(ent, i);
+        if (i % 3 == 0) ecs.NewComponent<std::string>(ent, i, 'x');
     }
 
-    float vertices[] = {
-        -.5f, -.5f, .0f,  1.f, .0f, .0f,
-         .5f, -.5f, .0f,  .0f, 1.f, .0f,
-         .0f,  .5f, .0f, .0f, .0f, 1.f
-    };
-    unsigned int indices[] = {
-        0, 1, 2
-    };
+    for (auto [id, x] : std::as_const(ecs).GetAll<int>()) {
+        DebugMessage("INFO", std::format("Entity {:>4d}: IntComp {:>4d}", id, x));
+    }
 
-    auto program = ShaderProgram{
-        Shader(SHADER_DIR "vert.glsl", GL_VERTEX_SHADER),
-        Shader(SHADER_DIR "frag.glsl", GL_FRAGMENT_SHADER)
-    };
+    for (auto [id, x] : std::as_const(ecs).GetAll<std::string>()) {
+        DebugMessage("INFO", std::format("Entity {:>4d}: StrComp {:<21}", id, x));
+    }
 
-    auto vbo = GLuint{};
-    auto ebo = GLuint{};
-    auto vao = GLuint{};
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-    glGenVertexArrays(1, &vao);
-
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), static_cast<void *>(nullptr));
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    auto coreManager = ECSManager<MeshComponent>{};
-
-    auto entity = coreManager.FreshEntity();
+    for (auto [id, s, x] : std::as_const(ecs).GetAll<std::string, int>()) {
+        DebugMessage("INFO", std::format("Entity {:>4d}: StrComp {:<21}   IntComp {:>4d}", id, s, x));
+    }
 
     while (!glfwWindowShouldClose(window.window)) {
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glUseProgram(program.programHandle);
-        glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-
-        glfwSwapBuffers(window.window);
-
         glfwPollEvents();
     }
 

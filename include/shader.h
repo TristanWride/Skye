@@ -7,7 +7,6 @@
 #include <glad/glad.h>
 
 #include <string>
-#include <initializer_list>
 
 struct Shader {
     GLuint shaderHandle;
@@ -35,7 +34,6 @@ struct ShaderProgram {
         ((glAttachShader(programHandle, shaders.shaderHandle)), ...);
 
         glLinkProgram(programHandle);
-
 
         auto CheckShaderProgramLinking = [](GLuint programHandle) {
             auto success = GLint{};
