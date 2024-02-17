@@ -1,6 +1,7 @@
 #include "shader.h"
 
 #include <fstream>
+#include <string>
 
 auto CheckShaderCompilation(GLuint shaderHandle) {
     auto success = GLint{};
@@ -19,7 +20,7 @@ Shader::Shader(const char* fileName, GLenum shaderType) {
     if (!shaderFile.is_open()) ThrowMessage("ERROR", std::format("Couldn't open file \"{}\"", fileName));
     auto length = shaderFile.tellg();
     shaderFile.seekg(0);
-    shaderSource.assign(length, '\0');
+    auto shaderSource = std::string(length, '\0');
     shaderFile.read(&shaderSource[0], length);
 
     shaderHandle = glCreateShader(shaderType);

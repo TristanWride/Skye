@@ -6,8 +6,6 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-#include <string>
-
 struct Shader {
     GLuint shaderHandle;
 
@@ -19,9 +17,6 @@ struct Shader {
     Shader& operator=(const Shader& other) = delete;
     Shader(Shader&& other) = delete;
     Shader& operator=(Shader&& other) = delete;
-
-private:
-    std::string shaderSource;
 };
 
 struct ShaderProgram {
@@ -31,7 +26,7 @@ struct ShaderProgram {
     ShaderProgram(T&&... shaders) {
         programHandle = glCreateProgram();
 
-        ((glAttachShader(programHandle, shaders.shaderHandle)), ...);
+        (glAttachShader(programHandle, shaders.shaderHandle), ...);
 
         glLinkProgram(programHandle);
 

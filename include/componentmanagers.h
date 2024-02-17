@@ -16,4 +16,4 @@ concept ComponentManagerFor = ComponentManager<CompM>
     && std::is_same_v<typename CompM::ComponentType, Comp> 
     && requires (CompM m, EntityId id) {
         { m.Get(id) } -> std::convertible_to<Comp>;
-};
+    };

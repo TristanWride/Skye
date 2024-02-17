@@ -19,9 +19,7 @@ auto DebugMessage(S&& debugLevel, T&& message) -> void {
             std::forward<S>(debugLevel), 
             std::forward<T>(message)
         );
-    } else {
-        // Do nothing
-    }
+    } 
 }
 
 template <class S, class T>
@@ -32,9 +30,7 @@ auto ThrowMessage(S&& debugLevel, T&& message) -> void {
             std::forward<S>(debugLevel), 
             std::forward<T>(message)
         );
-    } else {
-        // Do nothing
     }
-
+    
     throw std::runtime_error("CRASHED");
 }

@@ -6,6 +6,30 @@
 #include <ranges>
 #include <concepts>
 
+auto Mesh::UpdateRenderable() -> void {
+    renderable = Renderable(faces.size());
+
+    auto bufId = 0;
+    auto faceId = 0;
+    for (const auto& face : faces.rowwise()) {
+        for (auto&& vertId : face) {
+            assert(renderable.verticesBuff.rows() == vertices.cols());
+            assert(renderable.normalsBuff.rows() == faceNormals.cols());
+            renderable.verticesBuff.col(bufId) = vertices.row(vertId);
+            renderable.normalsBuff.col(bufId) = faceNormals.row(faceId);
+            bufId++;
+        }
+        ++faceId;
+    }
+
+    dirty = false;
+} 
+
+Mesh::Renderable::Renderable(Mesh::VertexId numVertices) {
+    verticesBuff.resize(Eigen::NoChange, numVertices);
+    normalsBuff.resize(Eigen::NoChange, numVertices);
+}
+
 auto Mesh::ReadObj(const char* filePath) -> Mesh {
     DebugMessage("INFO", std::format("Reading object file \"{}\"", filePath));
     auto inputFile = std::ifstream(filePath);

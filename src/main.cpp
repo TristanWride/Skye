@@ -1,10 +1,11 @@
-#include <glad/glad.h>
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
 #include "debugutils.h"
 #include "ecsmanager.h"
 #include "window.h"
+#include "meshcomponent.h"
+
+#include <glad/glad.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 #include <format>
 #include <string>
@@ -56,23 +57,9 @@ auto main() -> int {
         BasicCompManager<bool>
     >{};
 
-    for (auto i = 0; i < 20; ++i) {
-        auto ent = ecs.NewEntity().value();
-        if (i % 2 == 0) ecs.NewComponent<int>(ent, i);
-        if (i % 3 == 0) ecs.NewComponent<std::string>(ent, i, 'x');
-    }
+    auto mesh = Mesh::ReadObj(DATA_DIR "tris.obj");
 
-    for (auto [id, x] : std::as_const(ecs).GetAll<int>()) {
-        DebugMessage("INFO", std::format("Entity {:>4d}: IntComp {:>4d}", id, x));
-    }
-
-    for (auto [id, x] : std::as_const(ecs).GetAll<std::string>()) {
-        DebugMessage("INFO", std::format("Entity {:>4d}: StrComp {:<21}", id, x));
-    }
-
-    for (auto [id, s, x] : std::as_const(ecs).GetAll<std::string, int>()) {
-        DebugMessage("INFO", std::format("Entity {:>4d}: StrComp {:<21}   IntComp {:>4d}", id, s, x));
-    }
+    const auto& rend = mesh.GetRenderable();
 
     while (!glfwWindowShouldClose(window.window)) {
         glfwPollEvents();
