@@ -17,6 +17,10 @@ add_subdirectory ("${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glad")
 add_library (eigen INTERFACE)
 target_include_directories (eigen INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/eigen")
 
+# GLM Dependency
+add_library (glm INTERFACE)
+target_include_directories (glm INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glm")
+
 # Executable
 add_executable (visualizer)
 
@@ -31,6 +35,7 @@ target_include_directories (visualizer PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/incl
 target_link_libraries (visualizer glfw)
 target_link_libraries (visualizer glad)
 target_link_libraries (visualizer eigen)
+target_link_libraries (visualizer glm)
 
 target_compile_definitions (visualizer PUBLIC DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data/")
 target_compile_definitions (visualizer PUBLIC SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shader/")

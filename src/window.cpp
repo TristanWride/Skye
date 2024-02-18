@@ -18,8 +18,16 @@ Window::Window() {
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, &FramBufferSizeCallback);
+
+    glfwSwapInterval(1);
 }
 
 Window::~Window() {
     glfwDestroyWindow(window);
+}
+
+auto Window::GetAspectRatio() const -> float {
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    return static_cast<float>(width) / height;
 }

@@ -13,5 +13,7 @@ public:
     Window& operator=(const Window& other) = delete;
     Window& operator=(Window&& other) = delete;
 
+    auto GetAspectRatio() const -> float;
+
     GLFWwindow* window;
 };

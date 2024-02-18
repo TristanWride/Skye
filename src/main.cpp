@@ -1,7 +1,8 @@
 #include "debugutils.h"
-#include "ecsmanager.h"
 #include "window.h"
+#include "ecsmanager.h"
 #include "meshcomponent.h"
+#include "renderer.h"
 
 #include <glad/glad.h>
 #define GLFW_INCLUDE_NONE
@@ -51,17 +52,23 @@ auto main() -> int {
     if (!gladLoadGL()) ThrowMessage("ERROR", "Failed to initialise GLAD");
 
     auto ecs = ECSManager<
-        BasicCompManager<int>, 
-        BasicCompManager<double>, 
-        BasicCompManager<std::string>,
-        BasicCompManager<bool>
+        BasicCompManager<MeshComponent>
     >{};
 
-    auto mesh = Mesh::ReadObj(DATA_DIR "tris.obj");
+    auto renderer = Renderer{ecs, window};
+    auto e = ecs.NewEntity().value();
+    ecs.NewComponent<MeshComponent>(e, Mesh::ReadObj(DATA_DIR "tris.obj"));
 
-    const auto& rend = mesh.GetRenderable();
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
     while (!glfwWindowShouldClose(window.window)) {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        renderer.RenderMeshes();
+
+        glfwSwapBuffers(window.window);
         glfwPollEvents();
     }
 
