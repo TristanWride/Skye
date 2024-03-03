@@ -7,23 +7,29 @@
 #include <glad/glad.h>
 
 struct Shader {
-    GLuint shaderHandle;
+    GLuint shaderHandle = 0u;
 
     Shader(const char* fileName, GLenum shaderType);
-    ~Shader();
+    ~Shader() noexcept;
 
     Shader() = delete;
     Shader(const Shader& other) = delete;
     Shader& operator=(const Shader& other) = delete;
-    Shader(Shader&& other) = delete;
-    Shader& operator=(Shader&& other) = delete;
+
+    Shader(Shader&& other) noexcept;
 };
 
 struct ShaderProgram {
-    GLuint programHandle;
+    GLuint programHandle = 0u;
 
     template <typename... T>
+    requires (std::convertible_to<T, Shader> && ...)
     ShaderProgram(T&&... shaders) {
+        if (((shaders.shaderHandle == 0u) || ...)) {
+            DebugMessage("ERROR", "Incomplete shader given to program");
+            return;
+        }
+
         programHandle = glCreateProgram();
 
         (glAttachShader(programHandle, shaders.shaderHandle), ...);
@@ -37,7 +43,7 @@ struct ShaderProgram {
                 auto infoLogLength = GLint{};
                 glGetProgramiv(programHandle, GL_INFO_LOG_LENGTH, &infoLogLength);
                 auto infoLog = std::string(infoLogLength, '\0');
-                glGetProgramInfoLog(programHandle, infoLog.length(), NULL, &infoLog[0]);
+                glGetProgramInfoLog(programHandle, infoLogLength, NULL, &infoLog[0]);
                 ThrowMessage("ERROR", std::format("Shader linking error:\n{}", infoLog));
             }
         }; 
@@ -45,7 +51,7 @@ struct ShaderProgram {
         CheckShaderProgramLinking(programHandle);
     }
 
-    ~ShaderProgram();
+    ~ShaderProgram() noexcept;
 
     ShaderProgram(const ShaderProgram& other) = delete;
     ShaderProgram& operator=(const ShaderProgram& other) = delete;

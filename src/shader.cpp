@@ -3,21 +3,14 @@
 #include <fstream>
 #include <string>
 
-auto CheckShaderCompilation(GLuint shaderHandle) {
-    auto success = GLint{};
-    glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        auto infoLogLength = GLint{};
-        glGetShaderiv(shaderHandle, GL_INFO_LOG_LENGTH, &infoLogLength);
-        auto infoLog = std::string(infoLogLength, '\0');
-        glGetShaderInfoLog(shaderHandle, infoLog.length(), NULL, &infoLog[0]);
-        ThrowMessage("ERROR", std::format("Shader compilation error:\n{}", infoLog));
-    }
-}
-
 Shader::Shader(const char* fileName, GLenum shaderType) {
     auto shaderFile = std::ifstream(fileName, std::ifstream::ate);
-    if (!shaderFile.is_open()) ThrowMessage("ERROR", std::format("Couldn't open file \"{}\"", fileName));
+
+    if (!shaderFile.is_open()) {
+        DebugMessage("ERROR", std::format("Couldn't open file \"{}\"", fileName));
+        return;
+    }
+
     auto length = shaderFile.tellg();
     shaderFile.seekg(0);
     auto shaderSource = std::string(length, '\0');
@@ -28,13 +21,30 @@ Shader::Shader(const char* fileName, GLenum shaderType) {
 
     glShaderSource(shaderHandle, 1, &shaderSourceCStr, NULL);
     glCompileShader(shaderHandle);
-    CheckShaderCompilation(shaderHandle);
+
+    auto success = GLint{};
+    glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        auto infoLogLength = GLint{};
+        glGetShaderiv(shaderHandle, GL_INFO_LOG_LENGTH, &infoLogLength);
+        auto infoLog = std::string(infoLogLength, '\0');
+        glGetShaderInfoLog(shaderHandle, infoLogLength, NULL, &infoLog[0]);
+        DebugMessage("ERROR", std::format("Shader compilation error:\n{}", infoLog));
+        shaderHandle = 0u;
+        return;
+    }
 }
 
-Shader::~Shader() {
+Shader::Shader(Shader&& other) noexcept
+    : shaderHandle{other.shaderHandle}
+{
+    other.shaderHandle = 0u;
+}
+
+Shader::~Shader() noexcept {
     glDeleteShader(shaderHandle);
 }
 
-ShaderProgram::~ShaderProgram() {
+ShaderProgram::~ShaderProgram() noexcept {
     glDeleteProgram(programHandle);
 }

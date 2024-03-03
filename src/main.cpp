@@ -2,6 +2,8 @@
 #include "window.h"
 #include "ecsmanager.h"
 #include "meshcomponent.h"
+#include "cameracomponent.h"
+#include "transformcomponent.h"
 #include "renderer.h"
 
 #include <glad/glad.h>
@@ -12,7 +14,9 @@
 #include <string>
 #include <unordered_map>
 
-auto ErrorCallback(int error, const char* description) -> void {
+#include <iostream>
+
+auto ErrorCallback(int error, const char* description) noexcept -> void {
     DebugMessage("ERROR", std::format("error code {}: {}", error, description));
 }
 
@@ -21,7 +25,7 @@ auto GlobalSetup() -> void {
     glfwSetErrorCallback(ErrorCallback);
 }
 
-auto GlobalCleanup() -> void {
+auto GlobalCleanup() noexcept -> void {
     glfwTerminate();
 }
 
@@ -42,8 +46,8 @@ struct BasicCompManager {
 
 auto main() -> int {
     struct Environment {
-        Environment() { GlobalSetup(); }
-        ~Environment() { GlobalCleanup(); }
+        Environment() noexcept { GlobalSetup(); }
+        ~Environment() noexcept { GlobalCleanup(); }
     }; 
 
     auto env = Environment{};
@@ -52,12 +56,21 @@ auto main() -> int {
     if (!gladLoadGL()) ThrowMessage("ERROR", "Failed to initialise GLAD");
 
     auto ecs = ECSManager<
-        BasicCompManager<MeshComponent>
+        BasicCompManager<MeshComponent>,
+        BasicCompManager<CameraComponent>,
+        BasicCompManager<TransformComponent>
     >{};
 
     auto renderer = Renderer{ecs, window};
-    auto e = ecs.NewEntity().value();
-    ecs.NewComponent<MeshComponent>(e, Mesh::ReadObj(DATA_DIR "tris.obj"));
+    auto renderMesh = ecs.NewEntity().value();
+    ecs.NewComponent<MeshComponent>(renderMesh, Mesh::ReadObj(DATA_DIR "tris.obj"));
+
+    auto camera = ecs.NewEntity().value();
+    ecs.NewComponent<CameraComponent>(camera, 45.0f, window.GetAspectRatio(), 0.1f, 100.0f);
+    auto proj = ecs.GetComponent<CameraComponent>(camera).GetProjection();
+
+    ecs.NewComponent<TransformComponent>(camera, glm::vec3(1.0f), glm::mat4(1.0f), glm::vec3(0.0, 0.0, 10.0));
+    renderer.activeCamera = camera;
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);

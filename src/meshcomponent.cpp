@@ -6,20 +6,28 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <format>
 #include <fstream>
+#include <string>
+#include <sstream>
 #include <optional>
 #include <ranges>
 #include <vector>
 
+
 auto Mesh::ReadObj(const char* filePath) -> Mesh {
     DebugMessage("INFO", std::format("Reading object file \"{}\"", filePath));
     auto inputFile = std::ifstream(filePath);
+
+    if (!inputFile.is_open()) {
+        DebugMessage("ERROR", std::format("Failed to open file \"{}\"", filePath));
+        return Mesh{};
+    }
+
     auto mesh = Mesh{};
 
-    auto vertexPositions = std::vector<Eigen::Vector3<Mesh::ScalarType>>{};
-    auto normals = std::vector<Eigen::Vector3<Mesh::ScalarType>>{};
-    auto faceNormals = std::vector<Eigen::Vector3<Mesh::ScalarType>>{};
-    auto faces = std::vector<Eigen::Vector3<Mesh::VertexId>>{};
+    auto indexedVertices = std::vector<glm::vec3>{};
+    auto indexedNormals = std::vector<glm::vec3>{};
 
     // Read data from file into std::vectors
     for (std::string line; std::getline(inputFile, line); ){
@@ -33,15 +41,11 @@ auto Mesh::ReadObj(const char* filePath) -> Mesh {
         } else if (rowType == "s") {
             continue;
         } else if (rowType == "v") {
-            std::ranges::copy(
-                std::ranges::istream_view<Mesh::ScalarType>(iss),
-                vertexPositions.emplace_back().begin()
-            );
+            auto& vertex = indexedVertices.emplace_back();
+            iss >> vertex.x >> vertex.y >> vertex.z;
         } else if (rowType == "vn") {
-            std::ranges::copy(
-                std::ranges::istream_view<Mesh::ScalarType>(iss),
-                normals.emplace_back().begin()
-            );
+            auto& normal = indexedNormals.emplace_back();
+            iss >> normal.x >> normal.y >> normal.z;
         } else if (rowType == "f") {
             auto faceData = std::ranges::istream_view<std::string>(iss)
             | std::views::transform([](const auto& entry) -> std::tuple<VertexId, std::uint64_t> {
@@ -53,84 +57,52 @@ auto Mesh::ReadObj(const char* filePath) -> Mesh {
                 };
             }) | std::ranges::to<std::vector>();
 
-            if (faceData.size() > 3) ThrowMessage("ERROR", "Non-triangle faces not supported");
+            if (faceData.size() > 3) {
+                DebugMessage("ERROR", "Non-triangle faces not supported");
+                continue;
+            }
 
             std::ranges::copy(
-                faceData | std::views::elements<0>,
-                faces.emplace_back().begin()
+                faceData | std::views::transform([&indexedVertices, &indexedNormals](auto& entry) {
+                    return Vertex{ 
+                        indexedVertices[std::get<0>(entry)],
+                        indexedNormals[std::get<1>(entry)]
+                    };
+                }),
+                std::back_inserter(mesh.vertices)
             );
-
-            faceNormals.emplace_back(normals[std::get<1>(faceData.front())]);
         } else {
             DebugMessage("WARN", std::format("Encountered unknown row type {}", rowType));
         }
     }
 
-    mesh.vertexPositions.resize(vertexPositions.size(), Eigen::NoChange);
-    mesh.faceNormals.resize(faceNormals.size(), Eigen::NoChange);
-    mesh.faces.resize(faces.size(), Eigen::NoChange);
-
-    DebugMessage("INFO", std::format("Found {} faces and {} vertices", mesh.faces.rows(), mesh.vertexPositions.rows()));
-
-    std::copy(
-        vertexPositions.begin(),
-        vertexPositions.end(),
-        mesh.vertexPositions.rowwise().begin()
-    );
-
-    std::copy(
-        faceNormals.begin(),
-        faceNormals.end(),
-        mesh.faceNormals.rowwise().begin()
-    );
-
-    std::copy(
-        faces.begin(),
-        faces.end(),
-        mesh.faces.rowwise().begin()
-    );
+    DebugMessage("INFO", std::format("Found {} vertices", mesh.vertices.size()));
 
     return mesh;
 }
 
-MeshComponent::MeshComponent(const Mesh& mesh) {
-    std::vector<VertexData> vertexData;
-    vertexData.reserve(mesh.faces.size());
-    
-    auto faceId = 0u;
-    for (auto face : mesh.faces.rowwise()) {
-        for (auto vertexId : face) {
-            auto vData = VertexData{};
-            std::ranges::copy(mesh.vertexPositions.row(vertexId), vData.position.begin());
-            std::ranges::copy(mesh.faceNormals.row(faceId), vData.normal.begin());
-
-            vertexData.emplace_back(vData);
-        }
-        ++faceId;
-    }
-
-    numVertices = vertexData.size();
-
+MeshComponent::MeshComponent(const Mesh& mesh) noexcept
+    : numVertices{static_cast<unsigned int>(mesh.vertices.size())}
+{
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(VertexData), vertexData.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), reinterpret_cast<void *>(offsetof(VertexData, position)));
+    glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(Vertex), mesh.vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, position)));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), reinterpret_cast<void *>(offsetof(VertexData, normal)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, normal)));
     glEnableVertexAttribArray(1);
 }
 
-MeshComponent::MeshComponent(MeshComponent&& other) {
-    vao = other.vao;
-    vbo = other.vbo;
-
+MeshComponent::MeshComponent(MeshComponent&& other) noexcept
+    : vao{other.vao}, vbo{other.vbo}
+{
     other.vao = 0;
     other.vbo = 0;
 }
 
-MeshComponent::~MeshComponent() {
+MeshComponent::~MeshComponent() noexcept {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
 }

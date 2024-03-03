@@ -4,7 +4,7 @@
 
 #include <glad/glad.h>
 
-auto FramBufferSizeCallback(GLFWwindow* window, int width, int height) -> void {
+auto FrameBufferSizeCallback([[maybe_unused]] GLFWwindow* window, int width, int height) noexcept -> void {
     glViewport(0, 0, width, height);
 }
 
@@ -17,16 +17,16 @@ Window::Window() {
     if (!window) ThrowMessage("ERROR", "Failed to create window");
 
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, &FramBufferSizeCallback);
+    glfwSetFramebufferSizeCallback(window, &FrameBufferSizeCallback);
 
     glfwSwapInterval(1);
 }
 
-Window::~Window() {
+Window::~Window() noexcept {
     glfwDestroyWindow(window);
 }
 
-auto Window::GetAspectRatio() const -> float {
+auto Window::GetAspectRatio() const noexcept -> float {
     int width, height;
     glfwGetWindowSize(window, &width, &height);
     return static_cast<float>(width) / height;

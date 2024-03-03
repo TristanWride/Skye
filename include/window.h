@@ -6,14 +6,14 @@
 class Window {
 public:
     Window();
-    ~Window();
+    ~Window() noexcept;
 
     Window(const Window& other) = delete;
     Window(Window&& other) = delete;
     Window& operator=(const Window& other) = delete;
     Window& operator=(Window&& other) = delete;
 
-    auto GetAspectRatio() const -> float;
+    auto GetAspectRatio() const noexcept -> float;
 
     GLFWwindow* window;
 };

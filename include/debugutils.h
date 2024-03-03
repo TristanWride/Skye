@@ -12,10 +12,10 @@ inline constexpr bool DebugRunning = false;
 #endif
 
 template <class S, class T>
-auto DebugMessage(S&& debugLevel, T&& message) -> void {
+auto DebugMessage(S&& debugLevel, T&& message) noexcept -> void {
     if constexpr (DebugRunning) {
-        std::print(
-            "[{:<7}]: {}\n", 
+        std::println(
+            "[{:<7}]: {}", 
             std::forward<S>(debugLevel), 
             std::forward<T>(message)
         );
@@ -25,8 +25,8 @@ auto DebugMessage(S&& debugLevel, T&& message) -> void {
 template <class S, class T>
 auto ThrowMessage(S&& debugLevel, T&& message) -> void {
     if constexpr (DebugRunning) {
-        std::print(
-            "[{:<7}]: {}\n", 
+        std::println(
+            "[{:<7}]: {}", 
             std::forward<S>(debugLevel), 
             std::forward<T>(message)
         );

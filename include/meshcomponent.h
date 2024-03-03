@@ -1,33 +1,30 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <glad/glad.h>
-#include <Eigen/Core>
+
+#include <vector>
+
+struct Vertex {
+    glm::vec3 position;
+    glm::vec3 normal;
+};
 
 struct Mesh {
-    using ScalarType = float;
-    using EdgeId = std::uint32_t;
     using VertexId = std::uint32_t;
-    using FaceId = std::uint32_t;
 
-    Eigen::ArrayX3<ScalarType> vertexPositions;
-    Eigen::ArrayX3<ScalarType> faceNormals;
-    Eigen::ArrayX3<VertexId> faces;
+    std::vector<Vertex> vertices;
 
     static auto ReadObj(const char* filePath) -> Mesh;
 };
 
-struct VertexData {
-    std::array<Mesh::ScalarType, 3> position;
-    std::array<Mesh::ScalarType, 3> normal;
-};
-
 struct MeshComponent {
-    GLuint vbo;
-    GLuint vao;
+    GLuint vbo = 0u;
+    GLuint vao = 0u;
     unsigned int numVertices;
 
-    MeshComponent(const Mesh& mesh);
-    MeshComponent(MeshComponent&& other);
+    MeshComponent(const Mesh& mesh) noexcept;
+    MeshComponent(MeshComponent&& other) noexcept;
 
-    ~MeshComponent();
+    ~MeshComponent() noexcept;
 };
