@@ -43,11 +43,13 @@ auto GlobalCleanup() noexcept -> void {
 auto main() -> int {
     struct Environment {
         Window window;
+
         Environment() noexcept 
             : window{ GlobalSetup() }
         {}
 
         ~Environment() noexcept { 
+            window.Destroy();
             GlobalCleanup();
         }
     }; 

@@ -17,7 +17,6 @@
 static constexpr auto MAX_NUM_ENTITIES = EntityId{10'000};
 
 template <typename... CMs>
-requires (ComponentManager<CMs> && ...)
 class ECSManager {
 public:
     static constexpr auto NumComponents = sizeof...(CMs);
@@ -38,7 +37,6 @@ public:
     }
 
     template <typename... Comps>
-    requires SupportsComponents<ECSManager<CMs...>, Comps...>
     static consteval auto MakeComponentBitset() noexcept -> ComponentBitset {
         auto result = ComponentBitset{};
         (result.set(ComponentIndex<Comps>()), ...);
@@ -57,7 +55,6 @@ public:
     }
 
     template <typename Comp, std::size_t I = 0u, bool Found = false, std::size_t FoundI = 0u>
-    requires SupportsComponent<ECSManager<CMs...>, Comp>
     static consteval auto ComponentIndex() noexcept -> std::size_t {
         if constexpr (I >= std::tuple_size_v<ComponentTypes>) {
             static_assert (Found);
@@ -75,21 +72,18 @@ public:
     }
 
     template <typename Comp>
-    requires SupportsComponent<ECSManager<CMs...>, Comp>
-    decltype(auto) GetComponent(this auto&& self, EntityId id) {
+    auto&& GetComponent(this auto&& self, EntityId id) {
         return std::get<ComponentIndex<Comp>()>(std::forward<decltype(self)>(self).componentManagers).Get(id);
     }
 
     template <typename Comp, typename... Args>
-    requires SupportsComponent<ECSManager<CMs...>, Comp> && std::constructible_from<Comp, Args...>
     auto NewComponent(EntityId id, Args&&... args) -> void {
         entityBits[id]->set(ComponentIndex<Comp>());
         std::get<ComponentIndex<Comp>()>(componentManagers).New(id, std::forward<Args>(args)...);
     }
 
     template <typename... Comps>
-    requires SupportsComponents<ECSManager<CMs...>, Comps...>
-    decltype(auto) GetAll(this auto&& self) {
+    auto&& GetAll(this auto&& self) {
         static constexpr auto compBitset = MakeComponentBitset<Comps...>();
         return std::forward<decltype(self)>(self).entityBits 
             | std::views::enumerate
@@ -115,7 +109,7 @@ struct BasicCompManager {
         map.try_emplace(id, std::forward<Args>(args)...);
     }
 
-    decltype(auto) Get(this auto&& self, EntityId id) {
+    auto&& Get(this auto&& self, EntityId id) {
         return std::forward<decltype(self)>(self).map.at(id);
     }
 };

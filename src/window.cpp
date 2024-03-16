@@ -24,3 +24,7 @@ auto Window::GetAspectRatio() const noexcept -> float {
     glfwGetWindowSize(window.get(), &width, &height);
     return static_cast<float>(width) / height;
 }
+
+auto Window::Destroy() noexcept -> void {
+    window.release();
+}

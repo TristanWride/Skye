@@ -23,18 +23,14 @@ auto DebugMessage(S&& debugLevel, T&& message) noexcept -> void {
 }
 
 template <class S, class T>
-auto ThrowMessage(S&& debugLevel, T&& message) -> void {
-    if constexpr (DebugRunning) {
-        std::println(
+[[noreturn]] auto ThrowMessage(S&& debugLevel, T&& message) -> void {
+    const auto messageStr = std::format(
             "[{:<7}]: {}", 
             std::forward<S>(debugLevel), 
             std::forward<T>(message)
-        );
-    }
+    );
+
+    if constexpr (DebugRunning) std::println("{}", messageStr);
     
-    throw std::runtime_error(std::format(
-        "[{:<7}]: {}", 
-        std::forward<S>(debugLevel), 
-        std::forward<T>(message)
-    ));
+    throw std::runtime_error(messageStr);
 }
