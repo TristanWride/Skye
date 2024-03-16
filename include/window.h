@@ -15,7 +15,7 @@ public:
     auto Destroy() noexcept -> void;
 
     std::unique_ptr<GLFWwindow, decltype([](GLFWwindow* window) {
-        DebugMessage("INFO", "Deleting window");
+        DebugMessage("INFO", "Destroying window");
         glfwDestroyWindow(window);
     })> window;
 };

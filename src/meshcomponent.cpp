@@ -96,8 +96,11 @@ MeshComponent::MeshComponent(const Mesh& mesh) noexcept
 }
 
 MeshComponent& MeshComponent::operator=(MeshComponent&& other) noexcept {
-    vao = std::exchange(other.vao, 0);
-    vbo = std::exchange(other.vbo, 0);
+    if (vao != 0u) glDeleteVertexArrays(1, &vao);
+    if (vbo != 0u) glDeleteVertexArrays(1, &vbo);
+
+    vao = std::exchange(other.vao, 0u);
+    vbo = std::exchange(other.vbo, 0u);
     numVertices = other.numVertices;
     return *this;
 }
@@ -110,6 +113,6 @@ MeshComponent::MeshComponent(MeshComponent&& other) noexcept
 }
 
 MeshComponent::~MeshComponent() noexcept {
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
+    if (vao != 0u) glDeleteVertexArrays(1, &vao);
+    if (vbo != 0u) glDeleteVertexArrays(1, &vbo);
 }

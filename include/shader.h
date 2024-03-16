@@ -16,6 +16,7 @@ struct Shader {
     Shader(const Shader& other) = delete;
     Shader& operator=(const Shader& other) = delete;
 
+    Shader& operator=(Shader&& other) noexcept;
     Shader(Shader&& other) noexcept;
 };
 

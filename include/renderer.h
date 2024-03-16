@@ -13,7 +13,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 template <typename ECS>
-requires SupportsComponent<ECS, MeshComponent>
 struct Renderer {
     ECS& ecs;
     Window& window;

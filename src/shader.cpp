@@ -35,6 +35,12 @@ Shader::Shader(const char* fileName, GLenum shaderType) {
     }
 }
 
+Shader& Shader::operator=(Shader&& other) noexcept {
+    if (shaderHandle != 0u) glDeleteShader(shaderHandle);
+    shaderHandle = std::exchange(other.shaderHandle, 0u);
+    return *this;
+}
+
 Shader::Shader(Shader&& other) noexcept
     : shaderHandle{other.shaderHandle}
 {
@@ -42,7 +48,7 @@ Shader::Shader(Shader&& other) noexcept
 }
 
 Shader::~Shader() noexcept {
-    glDeleteShader(shaderHandle);
+    if(shaderHandle != 0u) glDeleteShader(shaderHandle);
 }
 
 ShaderProgram::~ShaderProgram() noexcept {
