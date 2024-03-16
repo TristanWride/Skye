@@ -1,19 +1,20 @@
 #pragma once
 
+#include "debugutils.h"
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
+#include <memory>
 
 class Window {
 public:
     Window();
-    ~Window() noexcept;
-
-    Window(const Window& other) = delete;
-    Window(Window&& other) = delete;
-    Window& operator=(const Window& other) = delete;
-    Window& operator=(Window&& other) = delete;
 
     auto GetAspectRatio() const noexcept -> float;
 
-    GLFWwindow* window;
+    std::unique_ptr<GLFWwindow, decltype([](GLFWwindow* window) {
+        DebugMessage("INFO", "Deleting window");
+        glfwDestroyWindow(window);
+    })> window;
 };

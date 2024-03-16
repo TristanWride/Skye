@@ -5,6 +5,7 @@
 #include "cameracomponent.h"
 #include "transformcomponent.h"
 #include "renderer.h"
+#include "inputcomponent.h"
 
 #include <glad/glad.h>
 #define GLFW_INCLUDE_NONE
@@ -20,40 +21,38 @@ auto ErrorCallback(int error, const char* description) noexcept -> void {
     DebugMessage("ERROR", std::format("error code {}: {}", error, description));
 }
 
-auto GlobalSetup() -> void {
+auto GlobalSetup() -> Window {
     if (glfwInit() != GLFW_TRUE) ThrowMessage("ERROR", "Failed to initialize GLFW");
     glfwSetErrorCallback(ErrorCallback);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    auto window = Window();
+
+    if (!gladLoadGL()) ThrowMessage("ERROR", "Failed to initialise GLAD");
+
+    return window;
 }
 
 auto GlobalCleanup() noexcept -> void {
     glfwTerminate();
 }
 
-template <typename T>
-struct BasicCompManager {
-    using ComponentType = T;
-    std::unordered_map<EntityId, T> map;
-
-    template <typename... Args>
-    auto New(EntityId id, Args&&... args) {
-        map.try_emplace(id, std::forward<Args>(args)...);
-    }
-
-    decltype(auto) Get(this auto&& self, EntityId id) {
-        return std::forward<decltype(self)>(self).map.at(id);
-    }
-};
-
 auto main() -> int {
     struct Environment {
-        Environment() noexcept { GlobalSetup(); }
-        ~Environment() noexcept { GlobalCleanup(); }
+        Window window;
+        Environment() noexcept 
+            : window{ GlobalSetup() }
+        {}
+
+        ~Environment() noexcept { 
+            GlobalCleanup();
+        }
     }; 
 
     auto env = Environment{};
-    auto window = Window();
-
-    if (!gladLoadGL()) ThrowMessage("ERROR", "Failed to initialise GLAD");
 
     auto ecs = ECSManager<
         BasicCompManager<MeshComponent>,
@@ -61,12 +60,12 @@ auto main() -> int {
         BasicCompManager<TransformComponent>
     >{};
 
-    auto renderer = Renderer{ecs, window};
+    auto renderer = Renderer{ecs, env.window};
     auto renderMesh = ecs.NewEntity().value();
     ecs.NewComponent<MeshComponent>(renderMesh, Mesh::ReadObj(DATA_DIR "tris.obj"));
 
     auto camera = ecs.NewEntity().value();
-    ecs.NewComponent<CameraComponent>(camera, 45.0f, window.GetAspectRatio(), 0.1f, 100.0f);
+    ecs.NewComponent<CameraComponent>(camera, 45.0f, env.window.GetAspectRatio(), 0.1f, 100.0f);
     auto proj = ecs.GetComponent<CameraComponent>(camera).GetProjection();
 
     ecs.NewComponent<TransformComponent>(camera, glm::vec3(1.0f), glm::mat4(1.0f), glm::vec3(0.0, 0.0, 10.0));
@@ -75,13 +74,13 @@ auto main() -> int {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
-    while (!glfwWindowShouldClose(window.window)) {
+    while (!glfwWindowShouldClose(env.window.window.get())) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderer.RenderMeshes();
 
-        glfwSwapBuffers(window.window);
+        glfwSwapBuffers(env.window.window.get());
         glfwPollEvents();
     }
 

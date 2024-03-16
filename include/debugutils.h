@@ -32,5 +32,9 @@ auto ThrowMessage(S&& debugLevel, T&& message) -> void {
         );
     }
     
-    throw std::runtime_error("CRASHED");
+    throw std::runtime_error(std::format(
+        "[{:<7}]: {}", 
+        std::forward<S>(debugLevel), 
+        std::forward<T>(message)
+    ));
 }

@@ -12,9 +12,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-
-template <typename ECS, typename Comp>
-concept SupportsComponent = ECS::template HasComponent<Comp>();
+#include <unordered_map>
 
 static constexpr auto MAX_NUM_ENTITIES = EntityId{10'000};
 
@@ -40,7 +38,7 @@ public:
     }
 
     template <typename... Comps>
-    requires (SupportsComponent<ECSManager<CMs...>, Comps> && ...)
+    requires SupportsComponents<ECSManager<CMs...>, Comps...>
     static consteval auto MakeComponentBitset() noexcept -> ComponentBitset {
         auto result = ComponentBitset{};
         (result.set(ComponentIndex<Comps>()), ...);
@@ -90,7 +88,7 @@ public:
     }
 
     template <typename... Comps>
-    requires (SupportsComponent<ECSManager<CMs...>, Comps> && ...)
+    requires SupportsComponents<ECSManager<CMs...>, Comps...>
     decltype(auto) GetAll(this auto&& self) {
         static constexpr auto compBitset = MakeComponentBitset<Comps...>();
         return std::forward<decltype(self)>(self).entityBits 
@@ -105,5 +103,19 @@ public:
                 return std::make_tuple(id, std::ref(std::forward<decltype(self)>(self).GetComponent<Comps>(id))...);
             });
     }
+};
 
+template <typename T>
+struct BasicCompManager {
+    using ComponentType = T;
+    std::unordered_map<EntityId, T> map;
+
+    template <typename... Args>
+    auto New(EntityId id, Args&&... args) {
+        map.try_emplace(id, std::forward<Args>(args)...);
+    }
+
+    decltype(auto) Get(this auto&& self, EntityId id) {
+        return std::forward<decltype(self)>(self).map.at(id);
+    }
 };
