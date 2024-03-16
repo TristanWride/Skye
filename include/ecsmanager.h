@@ -83,7 +83,7 @@ public:
     }
 
     template <typename... Comps>
-    auto&& GetAll(this auto&& self) {
+    auto GetAll(this auto&& self) {
         static constexpr auto compBitset = MakeComponentBitset<Comps...>();
         return std::forward<decltype(self)>(self).entityBits 
             | std::views::enumerate

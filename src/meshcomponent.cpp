@@ -95,8 +95,15 @@ MeshComponent::MeshComponent(const Mesh& mesh) noexcept
     glEnableVertexAttribArray(1);
 }
 
+MeshComponent& MeshComponent::operator=(MeshComponent&& other) noexcept {
+    vao = std::exchange(other.vao, 0);
+    vbo = std::exchange(other.vbo, 0);
+    numVertices = other.numVertices;
+    return *this;
+}
+
 MeshComponent::MeshComponent(MeshComponent&& other) noexcept
-    : vao{other.vao}, vbo{other.vbo}
+    : vao{other.vao}, vbo{other.vbo}, numVertices{other.numVertices}
 {
     other.vao = 0;
     other.vbo = 0;

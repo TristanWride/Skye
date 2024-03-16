@@ -24,6 +24,8 @@ struct MeshComponent {
     unsigned int numVertices;
 
     MeshComponent(const Mesh& mesh) noexcept;
+
+    MeshComponent& operator=(MeshComponent&& other) noexcept;
     MeshComponent(MeshComponent&& other) noexcept;
 
     ~MeshComponent() noexcept;
