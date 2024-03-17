@@ -16,7 +16,7 @@ concept ComponentManagerFor = ComponentManager<CompM>
     && std::is_same_v<typename CompM::ComponentType, Comp>;
 
 template <typename ECS, typename Comp>
-concept SupportsComponent = ECS::template HasComponent<Comp>();
+concept SupportsComponent = ECS::template HasComponentManager<Comp>();
 
 template <typename ECS, typename... Comps>
 concept SupportsComponents = (SupportsComponent<ECS, Comps> && ...);
