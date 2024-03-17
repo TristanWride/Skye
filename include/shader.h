@@ -9,23 +9,22 @@
 struct Shader {
     GLuint shaderHandle = 0u;
 
-    Shader(const char* fileName, GLenum shaderType);
+    [[nodiscard]] Shader(const char* fileName, GLenum shaderType);
     ~Shader() noexcept;
 
     Shader() = delete;
     Shader(const Shader& other) = delete;
     Shader& operator=(const Shader& other) = delete;
 
-    Shader& operator=(Shader&& other) noexcept;
-    Shader(Shader&& other) noexcept;
+    [[nodiscard]] Shader& operator=(Shader&& other) noexcept;
+    [[nodiscard]] Shader(Shader&& other) noexcept;
 };
 
 struct ShaderProgram {
     GLuint programHandle = 0u;
 
     template <typename... T>
-    requires (std::convertible_to<T, Shader> && ...)
-    ShaderProgram(T&&... shaders) {
+    [[nodiscard]] ShaderProgram(T&&... shaders) {
         if (((shaders.shaderHandle == 0u) || ...)) {
             DebugMessage("ERROR", "Incomplete shader given to program");
             return;

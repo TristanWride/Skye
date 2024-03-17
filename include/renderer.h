@@ -19,7 +19,7 @@ struct Renderer {
     ShaderProgram shaderProgram;
     std::optional<EntityId> activeCamera;
 
-    Renderer(ECS& ecs, Window& window) 
+    [[nodiscard]] Renderer(ECS& ecs, Window& window) 
         : ecs{ecs}, window{window}, shaderProgram(Shader(SHADER_DIR "vert.glsl", GL_VERTEX_SHADER), Shader(SHADER_DIR "frag.glsl", GL_FRAGMENT_SHADER)) 
     {}
 

@@ -116,14 +116,14 @@ public:
     template <typename... Comps>
     [[nodiscard]] auto GetAll(this auto&& self) {
         static constexpr auto compBitset = MakeComponentBitset<Comps...>();
-        return std::forward<decltype(self)>(self).entityBits 
+        return std::forward<decltype(self)>(self).entityBits
             | std::views::enumerate
-            | std::views::filter([] (const auto& entity) {
+            | std::views::filter([](const auto& entity) {
                 const auto& entityBits = std::get<1>(entity);
                 if (!entityBits.has_value()) return false;
                 return (compBitset & entityBits.value()) == compBitset;
             })
-            | std::views::transform([&self] (const auto& entity) {
+            | std::views::transform([&self](const auto& entity) {
                 auto id = static_cast<EntityId>(std::get<0>(entity));
                 return std::make_tuple(id, std::ref(std::forward<decltype(self)>(self).GetComponent<Comps>(id))...);
             });

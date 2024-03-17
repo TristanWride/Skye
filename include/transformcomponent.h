@@ -8,7 +8,7 @@ struct TransformComponent {
     glm::mat4 rotation;
     glm::vec3 translation;
 
-    inline auto GetTransform() const noexcept -> glm::mat4 {
+    [[nodiscard]] inline auto GetTransform() const noexcept -> glm::mat4 {
         auto t = glm::mat4(1.0f);
         t = glm::scale(t, scale);
         t = rotation * t;
@@ -16,7 +16,7 @@ struct TransformComponent {
         return t;
     }
 
-    inline auto GetInverseTransform() const noexcept -> glm::mat4 {
+    [[nodiscard]] inline auto GetInverseTransform() const noexcept -> glm::mat4 {
         auto t = glm::mat4(1.0f);
         t = glm::translate(t, -translation);
         t = glm::transpose(rotation) * t;

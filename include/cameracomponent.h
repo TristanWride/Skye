@@ -9,7 +9,7 @@ struct CameraComponent {
     float nearZ;
     float farZ;
 
-    inline auto GetProjection() const noexcept -> glm::mat4 {
+    [[nodiscard]] inline auto GetProjection() const noexcept -> glm::mat4 {
         return glm::perspective(glm::radians(fov), aspect, nearZ, farZ);
     }
 };

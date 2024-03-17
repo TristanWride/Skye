@@ -15,7 +15,7 @@ struct Mesh {
 
     std::vector<Vertex> vertices;
 
-    static auto ReadObj(const char* filePath) -> Mesh;
+    [[nodiscard]] static auto ReadObj(const char* filePath) -> Mesh;
 };
 
 struct MeshComponent {
@@ -23,10 +23,10 @@ struct MeshComponent {
     GLuint vao = 0u;
     unsigned int numVertices;
 
-    MeshComponent(const Mesh& mesh) noexcept;
+    [[nodiscard]] MeshComponent(const Mesh& mesh) noexcept;
 
-    MeshComponent& operator=(MeshComponent&& other) noexcept;
-    MeshComponent(MeshComponent&& other) noexcept;
+    [[nodiscard]] MeshComponent& operator=(MeshComponent&& other) noexcept;
+    [[nodiscard]] MeshComponent(MeshComponent&& other) noexcept;
 
     ~MeshComponent() noexcept;
 };

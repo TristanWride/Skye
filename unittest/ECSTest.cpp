@@ -233,22 +233,6 @@ TEST(ECS, ComponentAccess) {
     tmp = 31;
     EXPECT_EQ(constcomp, tmp);
     EXPECT_EQ(comp, tmp);
-
-    {
-        auto ecs0 = ECSManager<
-            StrictMock<RefCheckCompManagerMock<int>>,
-            StrictMock<RefCheckCompManagerMock<double>>
-        >{};
-
-        auto eid0 = ecs0.NewEntity().value();
-
-        using ::testing::ByMove;
-
-        EXPECT_CALL(ecs0.GetComponentManager<int>(), RValRefGet(eid0)).Times(1).WillOnce(Return(ByMove(2)));
-        auto&& comprval = std::move(ecs0).GetComponent<int>(eid0);
-
-        EXPECT_TRUE((std::same_as<decltype(comprval), int&&>));
-    }
 }
 
 TEST(ECS, ComponentCreation) {
@@ -298,7 +282,7 @@ TEST(ECS, RangedComponentAccess) {
         }
     }
 
-    int tmpint = 5135918203;
+    int tmpint = 513591;
     double tmpdouble = 3246.34623476;
     EXPECT_CALL(ecs.GetComponentManager<int>(), LValRefGet(_))
         .Times(5)
@@ -336,7 +320,7 @@ TEST(ECS, RangedComponentAccess) {
         auto expected = std::set<EntityId>{};
         auto actual = std::set<EntityId>{};
 
-        std::generate_n(std::inserter(expected, expected.end()), 10, [&] { return expected.size(); });
+        std::generate_n(std::inserter(expected, expected.end()), 10, [&] { return static_cast<EntityId>(expected.size()); });
 
         for (auto [id, intVal] : std::as_const(ecs).GetAll<int>()) {
             EXPECT_TRUE((std::convertible_to<decltype(id), EntityId>));

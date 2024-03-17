@@ -11,7 +11,7 @@ class Window {
 public:
     Window();
 
-    auto GetAspectRatio() const noexcept -> float;
+    [[nodiscard]] auto GetAspectRatio() const noexcept -> float;
     auto Destroy() noexcept -> void;
 
     std::unique_ptr<GLFWwindow, decltype([](GLFWwindow* window) {

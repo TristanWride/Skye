@@ -21,7 +21,7 @@ auto ErrorCallback(int error, const char* description) noexcept -> void {
     DebugMessage("ERROR", std::format("error code {}: {}", error, description));
 }
 
-auto GlobalSetup() -> Window {
+[[nodiscard]] auto GlobalSetup() -> Window {
     if (glfwInit() != GLFW_TRUE) ThrowMessage("ERROR", "Failed to initialize GLFW");
     glfwSetErrorCallback(ErrorCallback);
 
