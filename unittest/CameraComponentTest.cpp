@@ -31,15 +31,15 @@ TEST(CameraComponent, CorrectProjectionAspect) {
     EXPECT_NEAR(comp.GetProjection()[1][1], 1.0f, 1e-5f);
 }
 
-TEST(CameraComponent, DISABLED_ProjectedClipCoords) {
-    ASSERT_TRUE(false) << "Implement test";
+TEST(CameraComponent, ProjectedClipCoords) {
+    GTEST_SKIP();
 
     // Projected coordinates should be homomorphic at equal depths
     // Should see proportional changes with respect to depth
 }
 
-TEST(CameraComponent, DISABLED_ProjectedDepth) {
-    ASSERT_TRUE(false) << "Implement test";
+TEST(CameraComponent, ProjectedDepth) {
+    GTEST_SKIP();
 
     // Ordering by depth must be preserved
 }
