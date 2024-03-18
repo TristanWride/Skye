@@ -1,0 +1,46 @@
+#include "cameracomponent.h"
+
+#include <glm/glm.hpp>
+
+#include <gtest/gtest.h>
+
+#include <print>
+
+
+TEST(CameraComponent, CorrectProjectionAspect) {
+    auto comp = CameraComponent{
+        .fov = 90.0f,
+        .aspect = 1.0f,
+        .nearZ = 0.1f,
+        .farZ = 100.0f
+    };
+
+
+    EXPECT_NEAR(comp.GetProjection()[0][0], 1.0f, 1e-5f);
+    EXPECT_NEAR(comp.GetProjection()[1][1], 1.0f, 1e-5f);
+
+    comp = CameraComponent{
+        .fov = 90.0f,
+        .aspect = 3.654732f,
+        .nearZ = 0.1f,
+        .farZ = 100.0f
+    };
+
+
+    EXPECT_NEAR(comp.GetProjection()[0][0], 1.0f / 3.654732f, 1e-5f);
+    EXPECT_NEAR(comp.GetProjection()[1][1], 1.0f, 1e-5f);
+}
+
+TEST(CameraComponent, DISABLED_ProjectedClipCoords) {
+    ASSERT_TRUE(false) << "Implement test";
+
+    // Projected coordinates should be homomorphic at equal depths
+    // Should see proportional changes with respect to depth
+}
+
+TEST(CameraComponent, DISABLED_ProjectedDepth) {
+    ASSERT_TRUE(false) << "Implement test";
+
+    // Ordering by depth must be preserved
+}
+

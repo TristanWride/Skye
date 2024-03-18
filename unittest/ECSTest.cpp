@@ -10,7 +10,6 @@
 #include <utility>
 #include <concepts>
 #include <set>
-#include <numeric>
 
 TEST(ECS, DefaultConstruction) {
     auto ecs = ECSManager<
