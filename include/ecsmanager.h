@@ -28,7 +28,9 @@ public:
     }
 
     template <typename... Comps>
-    [[nodiscard]] static consteval auto MakeComponentBitset() noexcept -> ComponentBitset {
+    requires SupportsComponents<ECSManager<CMs...>, Comps...>
+    [[nodiscard]] static consteval auto MakeComponentBitset() noexcept -> ComponentBitset 
+    {
         auto result = ComponentBitset{};
         (result.set(ComponentIndex<Comps>()), ...);
         return result;
@@ -46,6 +48,7 @@ public:
     }
 
     template <typename Comp, std::size_t I = 0u, bool Found = false, std::size_t FoundI = 0u>
+    requires SupportsComponent<ECSManager<CMs...>, Comp>
     [[nodiscard]] static consteval auto ComponentIndex() noexcept {
         if constexpr (I >= std::tuple_size_v<ComponentTypes>) {
             static_assert (Found);
@@ -72,6 +75,7 @@ public:
     }
 
     template <typename... Comps>
+    requires SupportsComponents<ECSManager<CMs...>, Comps...>
     [[nodiscard]] auto HasComponents(EntityId id) const -> bool {
         static constexpr auto requiredBits = MakeComponentBitset<Comps...>();
         if (!IsValidEntity(id)) return false;
@@ -98,22 +102,26 @@ public:
     }
 
     template <typename Comp>
+    requires SupportsComponent<ECSManager<CMs...>, Comp>
     [[nodiscard]] auto&& GetComponent(this auto&& self, EntityId id) {
         return std::get<ComponentIndex<Comp>()>(std::forward<decltype(self)>(self).componentManagers).Get(id);
     }
 
     template <typename Comp>
+    requires SupportsComponent<ECSManager<CMs...>, Comp>
     [[nodiscard]] auto&& GetComponentManager(this auto&& self) {
         return std::get<ComponentIndex<Comp>()>(std::forward<decltype(self)>(self).componentManagers);
     }
 
     template <typename Comp, typename... Args>
+    requires SupportsComponent<ECSManager<CMs...>, Comp> && std::constructible_from<Comp, Args...>
     auto NewComponent(EntityId id, Args&&... args) -> void {
         entityBits[id]->set(ComponentIndex<Comp>());
         std::get<ComponentIndex<Comp>()>(componentManagers).New(id, std::forward<Args>(args)...);
     }
 
     template <typename... Comps>
+    requires SupportsComponents<ECSManager<CMs...>, Comps...>
     [[nodiscard]] auto GetAll(this auto&& self) {
         static constexpr auto compBitset = MakeComponentBitset<Comps...>();
         return std::forward<decltype(self)>(self).entityBits
@@ -140,8 +148,10 @@ struct BasicCompManager {
     std::unordered_map<EntityId, T> map;
 
     template <typename... Args>
-    auto New(EntityId id, Args&&... args) -> void {
-        map.try_emplace(id, std::forward<Args>(args)...);
+    requires std::constructible_from<ComponentType, Args...>
+    auto& New(EntityId id, Args&&... args) {
+        auto [iter, success] = map.try_emplace(id, std::forward<Args>(args)...);
+        return *iter;
     }
 
     [[nodiscard]] auto&& Get(this auto&& self, EntityId id) {

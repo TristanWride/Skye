@@ -6,9 +6,9 @@
 #endif
 
 #ifndef NDEBUG
-inline constexpr bool DebugRunning = true;
+inline static constexpr bool DebugRunning = true;
 #else
-inline constexpr bool DebugRunning = false;
+inline static constexpr bool DebugRunning = false;
 #endif
 
 template <class S, class T>

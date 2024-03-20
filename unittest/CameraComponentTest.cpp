@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 #include <print>
-
+#include <ranges>
 
 TEST(CameraComponent, CorrectProjectionAspect) {
     auto comp = CameraComponent{
@@ -29,18 +29,5 @@ TEST(CameraComponent, CorrectProjectionAspect) {
 
     EXPECT_NEAR(comp.GetProjection()[0][0], 1.0f / 3.654732f, 1e-5f);
     EXPECT_NEAR(comp.GetProjection()[1][1], 1.0f, 1e-5f);
-}
-
-TEST(CameraComponent, ProjectedClipCoords) {
-    GTEST_SKIP();
-
-    // Projected coordinates should be homomorphic at equal depths
-    // Should see proportional changes with respect to depth
-}
-
-TEST(CameraComponent, ProjectedDepth) {
-    GTEST_SKIP();
-
-    // Ordering by depth must be preserved
 }
 
