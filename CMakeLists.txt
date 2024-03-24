@@ -4,6 +4,8 @@ project (PersonalProjectKnit)
 
 set (CMAKE_CXX_STANDARD 23)
 
+enable_testing ()
+
 if(MSVC)
   # Force to always compile with W4
   add_compile_options (/W4 /WX /EHsc "$<$<CONFIG:Debug>:/Od>" "$<$<CONFIG:Release>:/O2>")
