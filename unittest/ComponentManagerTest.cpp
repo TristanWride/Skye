@@ -49,28 +49,45 @@ TYPED_TEST(CompManagerFixture, ComponentCreationMulti) {
 
 TYPED_TEST(CompManagerFixture, ComponentDeletion) {
     TypeParam compManager{};
-    auto&& component1 = compManager.New(8u, 154);
+    auto&& component1 = compManager.New(8U, 154);
     EXPECT_TRUE((std::same_as<decltype(component1), typename TypeParam::ComponentType&>)) << "New should return reference to component type";
-    auto&& component2 = compManager.New(10u, 114);
+    auto&& component2 = compManager.New(10U, 114);
     EXPECT_TRUE((std::same_as<decltype(component2), typename TypeParam::ComponentType&>)) << "New should return reference to component type";
 
-    EXPECT_TRUE(compManager.HasEntity(8u)) << "Component should exist";
-    EXPECT_TRUE(compManager.HasEntity(10u)) << "Component should exist";
+    EXPECT_TRUE(compManager.HasEntity(8U)) << "Component should exist";
+    EXPECT_TRUE(compManager.HasEntity(10U)) << "Component should exist";
 
-    EXPECT_TRUE(compManager.Delete(8u)) << "Component should be deleted successfully";
+    EXPECT_TRUE(compManager.Delete(8U)) << "Component should be deleted successfully";
     
-    EXPECT_FALSE(compManager.HasEntity(8u)) << "Component should not exist after being deleted";
-    EXPECT_TRUE(compManager.HasEntity(10u)) << "Component should still exist";
+    EXPECT_FALSE(compManager.HasEntity(8U)) << "Component should not exist after being deleted";
+    EXPECT_TRUE(compManager.HasEntity(10U)) << "Component should still exist";
 
-    EXPECT_FALSE(compManager.Delete(8u)) << "Failed deletion should return false";
+    EXPECT_FALSE(compManager.Delete(8U)) << "Failed deletion should return false";
     
-    EXPECT_FALSE(compManager.HasEntity(8u)) << "Component should not exist after failed deletion";
-    EXPECT_TRUE(compManager.HasEntity(10u)) << "Component should still exist after failed deletion";
+    EXPECT_FALSE(compManager.HasEntity(8U)) << "Component should not exist after failed deletion";
+    EXPECT_TRUE(compManager.HasEntity(10U)) << "Component should still exist after failed deletion";
 
-    EXPECT_TRUE(compManager.Delete(10u)) << "Successful deletion should return true";
+    EXPECT_TRUE(compManager.Delete(10U)) << "Successful deletion should return true";
     
-    EXPECT_FALSE(compManager.HasEntity(8u)) << "Component should not exist after deletion";
-    EXPECT_FALSE(compManager.HasEntity(10u)) << "Component should not exist after deletion";
+    EXPECT_FALSE(compManager.HasEntity(8U)) << "Component should not exist after deletion";
+    EXPECT_FALSE(compManager.HasEntity(10U)) << "Component should not exist after deletion";
 
-    EXPECT_FALSE(compManager.Delete(10u)) << "Failed deletion should return false";
+    EXPECT_FALSE(compManager.Delete(10U)) << "Failed deletion should return false";
+}
+
+TEST(DynamicCompManager, CanDoPolymorphism) {
+    struct Base {
+        virtual auto IsBase() const noexcept -> bool { return true; }
+    };
+    struct Derived : public Base {
+        auto IsBase() const noexcept -> bool override { return false; }
+    };
+
+    DynamicCompManager<Base> compManager{};
+
+    compManager.New(5U, Base{});
+    compManager.New(9U, Derived{});
+    
+    EXPECT_TRUE(compManager.Get(5U).IsBase());
+    EXPECT_FALSE(compManager.Get(9U).IsBase());
 }
