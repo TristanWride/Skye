@@ -178,13 +178,13 @@ struct BasicCompManager {
 
     template <typename... Args>
     requires std::constructible_from<ComponentType, Args...>
-    auto& New(EntityId id, Args&&... args) {
+    auto New(EntityId id, Args&&... args) -> T& {
         auto [iter, success] = map.try_emplace(id, std::forward<Args>(args)...);
-        return *iter;
+        return iter->second;
     }
 
-    [[nodiscard]] auto& Get(EntityId id) { return map.at(id); }
-    [[nodiscard]] const auto& Get(EntityId id) const { return map.at(id); }
+    [[nodiscard]] auto Get(EntityId id) -> T& { return map.at(id); }
+    [[nodiscard]] auto Get(EntityId id) const -> const T& { return map.at(id); }
 
     [[nodiscard]] auto HasEntity(EntityId id) const -> bool {
         auto iter = map.find(id);
@@ -197,4 +197,18 @@ struct BasicCompManager {
         map.erase(iter);
         return true;
     }
+};
+
+template <typename T>
+struct DynamicCompManager : public BasicCompManager<std::unique_ptr<T>> {
+    using ComponentType = T;
+
+    template <typename... Args>
+    requires std::constructible_from<ComponentType, Args...>
+    auto New(EntityId id, Args&&... args) -> T& {
+        return *BasicCompManager<std::unique_ptr<T>>::New(id, std::make_unique<Args...>(std::forward<Args>(args)...));
+    }
+
+    [[nodiscard]] auto Get(EntityId id) -> T& { return *BasicCompManager<std::unique_ptr<T>>::Get(id); }
+    [[nodiscard]] auto Get(EntityId id) const -> const T& { return *BasicCompManager<std::unique_ptr<T>>::Get(id).get(); }
 };
