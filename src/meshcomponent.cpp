@@ -1,17 +1,15 @@
 #include "meshcomponent.h"
+
 #include "debugutils.h"
 
-#include <array>
-#include <algorithm>
-#include <concepts>
+#include <bit>
 #include <cstddef>
-#include <cstdint>
 #include <format>
 #include <fstream>
-#include <string>
+#include <limits>
 #include <sstream>
-#include <optional>
-#include <ranges>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 
@@ -28,9 +26,9 @@ auto Mesh::ReadObj(const char* filePath) -> Mesh {
 }
 
 auto Mesh::ReadObj(std::string_view inputStr) -> Mesh {
-    auto ss = std::stringstream{};
-    ss << inputStr;
-    return Mesh::ReadObj(ss);
+    auto objStream = std::stringstream{};
+    objStream << inputStr;
+    return Mesh::ReadObj(objStream);
 }
 
 MeshComponent::MeshComponent(const Mesh& mesh) noexcept
@@ -40,19 +38,29 @@ MeshComponent::MeshComponent(const Mesh& mesh) noexcept
     glGenBuffers(1, &vbo);
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(Vertex), mesh.vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, position)));
+
+    const auto meshSize = [&] {
+        if (mesh.vertices.size() * sizeof(Vertex) > static_cast<size_t>(std::numeric_limits<GLsizeiptr>::max())) [[unlikely]] {
+            DebugMessage("WARN", "Mesh loaded is too large, cropping to size");
+            return std::numeric_limits<GLsizeiptr>::max();
+        }
+
+        return static_cast<GLsizeiptr>(mesh.vertices.size() * sizeof(Vertex));
+    }();
+
+    glBufferData(GL_ARRAY_BUFFER, meshSize, mesh.vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), std::bit_cast<void *>(offsetof(Vertex, position)));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, normal)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), std::bit_cast<void *>(offsetof(Vertex, normal)));
     glEnableVertexAttribArray(1);
 }
 
-MeshComponent& MeshComponent::operator=(MeshComponent&& other) noexcept {
-    if (vao != 0u) glDeleteVertexArrays(1, &vao);
-    if (vbo != 0u) glDeleteVertexArrays(1, &vbo);
+auto MeshComponent::operator=(MeshComponent&& other) noexcept -> MeshComponent& {
+    if (vao != 0U) { glDeleteVertexArrays(1U, &vao); }
+    if (vbo != 0U) { glDeleteVertexArrays(1U, &vbo); }
 
-    vao = std::exchange(other.vao, 0u);
-    vbo = std::exchange(other.vbo, 0u);
+    vao = std::exchange(other.vao, 0U);
+    vbo = std::exchange(other.vbo, 0U);
     numVertices = other.numVertices;
     return *this;
 }
@@ -60,11 +68,11 @@ MeshComponent& MeshComponent::operator=(MeshComponent&& other) noexcept {
 MeshComponent::MeshComponent(MeshComponent&& other) noexcept
     : vao{other.vao}, vbo{other.vbo}, numVertices{other.numVertices}
 {
-    other.vao = 0;
-    other.vbo = 0;
+    other.vao = 0U;
+    other.vbo = 0U;
 }
 
 MeshComponent::~MeshComponent() noexcept {
-    if (vao != 0u) glDeleteVertexArrays(1, &vao);
-    if (vbo != 0u) glDeleteVertexArrays(1, &vbo);
+    if (vao != 0U) { glDeleteVertexArrays(1U, &vao); }
+    if (vbo != 0U) { glDeleteVertexArrays(1U, &vbo); }
 }

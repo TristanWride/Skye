@@ -3,7 +3,6 @@
 #include "ecsmanager.h"
 #include "meshcomponent.h"
 #include "shader.h"
-#include "window.h"
 #include "cameracomponent.h"
 #include "transformcomponent.h"
 
@@ -15,12 +14,11 @@
 template <typename ECS>
 struct Renderer {
     ECS& ecs;
-    Window& window;
     ShaderProgram shaderProgram;
     std::optional<EntityId> activeCamera;
 
-    [[nodiscard]] Renderer(ECS& ecs, Window& window) 
-        : ecs{ecs}, window{window}, shaderProgram(Shader(SHADER_DIR "vert.glsl", GL_VERTEX_SHADER), Shader(SHADER_DIR "frag.glsl", GL_FRAGMENT_SHADER)) 
+    [[nodiscard]] Renderer(ECS& ecs) 
+        : ecs{ecs}, shaderProgram(Shader(SHADER_DIR "vert.glsl", GL_VERTEX_SHADER), Shader(SHADER_DIR "frag.glsl", GL_FRAGMENT_SHADER)) 
     {}
 
     auto RenderMeshes() noexcept -> void {

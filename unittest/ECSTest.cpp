@@ -1,15 +1,17 @@
 #include "ecsmanager.h"
 
-#include <gtest/gtest.h>
+#include "componentmanagers.h"
+
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <format>
-#include <vector>
-#include <type_traits>
-#include <string>
-#include <utility>
-#include <concepts>
 #include <set>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 TEST(ECS, DefaultConstruction) {
     auto ecs = ECSManager<
@@ -18,8 +20,8 @@ TEST(ECS, DefaultConstruction) {
         BasicCompManager<float>
     >{};
 
-    ASSERT_EQ(ecs.NumComponentSlots(), 3u);
-    ASSERT_EQ(ecs.NumEntitySlots(), 0u);
+    ASSERT_EQ(ecs.NumComponentSlots(), 3U);
+    ASSERT_EQ(ecs.NumEntitySlots(), 0U);
 }
 
 TEST(ECS, EntityCreation) {
@@ -71,10 +73,10 @@ TEST(ECS, StaticComponentIndices) {
         BasicCompManager<std::vector<bool>>
     >{};
 
-    ASSERT_EQ(decltype(ecs)::ComponentIndex<int>(), 0u);
-    ASSERT_EQ(decltype(ecs)::ComponentIndex<double>(), 1u);
-    ASSERT_EQ(decltype(ecs)::ComponentIndex<float>(), 2u);
-    ASSERT_EQ(decltype(ecs)::ComponentIndex<std::vector<bool>>(), 3u);
+    ASSERT_EQ(decltype(ecs)::ComponentIndex<int>(), 0U);
+    ASSERT_EQ(decltype(ecs)::ComponentIndex<double>(), 1U);
+    ASSERT_EQ(decltype(ecs)::ComponentIndex<float>(), 2U);
+    ASSERT_EQ(decltype(ecs)::ComponentIndex<std::vector<bool>>(), 3U);
 }
 
 TEST(ECS, RuntimeComponentCheck) {
@@ -87,32 +89,32 @@ TEST(ECS, RuntimeComponentCheck) {
 
     std::vector<EntityId> eids;
 
-    for (auto i = 0u; i < 100u; ++i) {
+    for (auto i = 0U; i < 100U; ++i) {
         eids.emplace_back(ecs.NewEntity().value());
     }
 
-    for (auto i = 0u; i < 100u; ++i) {
+    for (auto i = 0U; i < 100U; ++i) {
         ecs.NewComponent<int>(eids[i], i);
-        if (i % 2 == 0) ecs.NewComponent<double>(eids[i], static_cast<double>(i) / 2.0);
-        if (i % 3 == 0) ecs.NewComponent<float>(eids[i], static_cast<float>(i) / 7.0f);
-        if (i % 5 == 0) ecs.NewComponent<std::vector<int>>(eids[i], i, i * 13);
+        if (i % 2U == 0U) ecs.NewComponent<double>(eids[i], static_cast<double>(i) / 2.0);
+        if (i % 3U == 0U) ecs.NewComponent<float>(eids[i], static_cast<float>(i) / 7.0F);
+        if (i % 5U == 0U) ecs.NewComponent<std::vector<int>>(eids[i], i, i * 13);
     }
 
-    for (auto i = 0u; i < 100u; ++i) {
+    for (auto i = 0U; i < 100U; ++i) {
         auto message = std::format("Checking entity {}", i);
         ASSERT_TRUE(ecs.HasComponents<int>(i)) << message;
-        if (i %  2 == 0) ASSERT_TRUE((ecs.HasComponents<int, double>(i))) << message;
-        if (i %  3 == 0) ASSERT_TRUE((ecs.HasComponents<int, float>(i))) << message;
-        if (i %  5 == 0) ASSERT_TRUE((ecs.HasComponents<int, std::vector<int>>(i))) << message;
-        if (i %  6 == 0) ASSERT_TRUE((ecs.HasComponents<int, double, float>(i))) << message;
-        if (i % 10 == 0) ASSERT_TRUE((ecs.HasComponents<int, double, std::vector<int>>(i))) << message;
-        if (i % 15 == 0) ASSERT_TRUE((ecs.HasComponents<int, float, std::vector<int>>(i))) << message;
-        if (i % 30 == 0) ASSERT_TRUE((ecs.HasComponents<float, int, std::vector<int>, double>(i))) << message;
+        if (i %  2U == 0U) ASSERT_TRUE((ecs.HasComponents<int, double>(i))) << message;
+        if (i %  3U == 0U) ASSERT_TRUE((ecs.HasComponents<int, float>(i))) << message;
+        if (i %  5U == 0U) ASSERT_TRUE((ecs.HasComponents<int, std::vector<int>>(i))) << message;
+        if (i %  6U == 0U) ASSERT_TRUE((ecs.HasComponents<int, double, float>(i))) << message;
+        if (i % 10U == 0U) ASSERT_TRUE((ecs.HasComponents<int, double, std::vector<int>>(i))) << message;
+        if (i % 15U == 0U) ASSERT_TRUE((ecs.HasComponents<int, float, std::vector<int>>(i))) << message;
+        if (i % 30U == 0U) ASSERT_TRUE((ecs.HasComponents<float, int, std::vector<int>, double>(i))) << message;
 
-        if (i %  2 != 0) ASSERT_FALSE((ecs.HasComponents<double>(i))) << message;
-        if (i %  2 != 0) ASSERT_FALSE((ecs.HasComponents<int, double>(i))) << message;
-        if (i %  2 != 0) ASSERT_FALSE((ecs.HasComponents<int, double, float>(i))) << message;
-        if (i %  2 != 0) ASSERT_FALSE((ecs.HasComponents<int, double, float, std::vector<int>>(i))) << message;
+        if (i %  2U != 0U) ASSERT_FALSE((ecs.HasComponents<double>(i))) << message;
+        if (i %  2U != 0U) ASSERT_FALSE((ecs.HasComponents<int, double>(i))) << message;
+        if (i %  2U != 0U) ASSERT_FALSE((ecs.HasComponents<int, double, float>(i))) << message;
+        if (i %  2U != 0U) ASSERT_FALSE((ecs.HasComponents<int, double, float, std::vector<int>>(i))) << message;
     }
 }
 
@@ -122,16 +124,16 @@ TEST(ECS, ValidEntity) {
         BasicCompManager<double>
     >{};
 
-    EXPECT_FALSE(ecs.IsValidEntity(15u));
+    EXPECT_FALSE(ecs.IsValidEntity(15U));
 
     std::vector<EntityId> eids;
 
-    for (auto i = 0u; i < 20u; ++i) {
+    for (auto i = 0U; i < 20U; ++i) {
         eids.emplace_back(ecs.NewEntity().value());
         EXPECT_TRUE(ecs.IsValidEntity(eids[i]));
     }
 
-    for (auto i = 0u; i < 20u; ++i) {
+    for (auto i = 0U; i < 20U; ++i) {
         ecs.DeleteEntity(eids[i]);
         EXPECT_FALSE(ecs.IsValidEntity(eids[i]));
     }
@@ -156,11 +158,11 @@ TEST(ECS, EntityDeletion) {
 
     std::vector<EntityId> eids;
 
-    for (auto i = 0u; i < 10u; ++i) {
+    for (auto i = 0U; i < 10U; ++i) {
         eids.emplace_back(ecs.NewEntity().value());
     }
 
-    for (auto i = 0u; i < 10u; ++i) {
+    for (auto i = 0U; i < 10U; ++i) {
         EXPECT_CALL(ecs.GetComponentManager<int>(), New(eids[i], i)).Times(1);
         ecs.NewComponent<int>(eids[i], i);
         if (i % 2 == 0) {
@@ -170,7 +172,7 @@ TEST(ECS, EntityDeletion) {
         }
     }
 
-    for (auto i = 0u; i < 10u; ++i) {
+    for (auto i = 0U; i < 10U; ++i) {
         EXPECT_CALL(ecs.GetComponentManager<int>(), Delete(eids[i]));
         if (i % 2 == 0) {
             EXPECT_CALL(ecs.GetComponentManager<double>(), Delete(eids[i]))
@@ -180,7 +182,7 @@ TEST(ECS, EntityDeletion) {
         ecs.DeleteEntity(i);
     }
 
-    for (auto i = 0u; i < 10u; ++i) {
+    for (auto i = 0U; i < 10U; ++i) {
         auto message = std::format("Checking entity {}", i);
         EXPECT_FALSE(ecs.IsValidEntity(i));
     }
@@ -250,7 +252,7 @@ TEST(ECS, ComponentCreation) {
     ecs.NewComponent<std::vector<bool>>(eid);
 
     ASSERT_EQ(ecs.GetComponent<double>(eid), 654.321);
-    ASSERT_EQ(ecs.GetComponent<std::vector<bool>>(eid).size(), 0u);
+    ASSERT_EQ(ecs.GetComponent<std::vector<bool>>(eid).size(), 0U);
 }
 
 TEST(ECS, RangedComponentAccess) {
@@ -266,15 +268,15 @@ TEST(ECS, RangedComponentAccess) {
 
     std::vector<EntityId> eids;
 
-    for (auto i = 0u; i < 10u; ++i) {
+    for (auto i = 0U; i < 10U; ++i) {
         eids.emplace_back(ecs.NewEntity().value());
     }
 
-    for (auto i = 0u; i < 10u; ++i) {
+    for (auto i = 0U; i < 10U; ++i) {
         EXPECT_CALL(ecs.GetComponentManager<int>(), New(eids[i], i)).Times(1);
         ecs.NewComponent<int>(eids[i], i);
 
-        if (i % 2 == 0) {
+        if (i % 2U == 0) {
             auto val = static_cast<double>(i) / 2.0;
             EXPECT_CALL(ecs.GetComponentManager<double>(), New(eids[i], val)).Times(1);
             ecs.NewComponent<double>(eids[i], val);
@@ -292,13 +294,12 @@ TEST(ECS, RangedComponentAccess) {
         .WillRepeatedly(ReturnRef(tmpdouble));
 
     {
-        auto expected = std::set<EntityId>{0, 2, 4, 6, 8};
+        auto expected = std::set<EntityId>{0U, 2U, 4U, 6U, 8U};
         auto actual = std::set<EntityId>{};
 
-        for (auto [id, intVal, doubleVal] : ecs.GetAll<int, double>()) {
-            EXPECT_TRUE((std::convertible_to<decltype(id), EntityId>));
-            EXPECT_TRUE((std::same_as<decltype(intVal), int&>));
-            EXPECT_TRUE((std::same_as<decltype(doubleVal), double&>));
+        for (auto entry : ecs.GetAll<int, double>()) {
+            EXPECT_TRUE((std::same_as<decltype(entry), std::tuple<EntityId, int&, double&>>));
+            auto [id, intVal, doubleVal] = entry;
             actual.emplace(id);
 
             tmpint = (id * 17) + 51;
@@ -319,11 +320,12 @@ TEST(ECS, RangedComponentAccess) {
         auto expected = std::set<EntityId>{};
         auto actual = std::set<EntityId>{};
 
-        std::generate_n(std::inserter(expected, expected.end()), 10, [&] { return static_cast<EntityId>(expected.size()); });
+        std::generate_n(std::inserter(expected, expected.end()), 10U, [&] { return static_cast<EntityId>(expected.size()); });
 
-        for (auto [id, intVal] : std::as_const(ecs).GetAll<int>()) {
-            EXPECT_TRUE((std::convertible_to<decltype(id), EntityId>));
-            EXPECT_TRUE((std::same_as<decltype(intVal), const int&>));
+        for (auto entry : std::as_const(ecs).GetAll<int>()) {
+            EXPECT_TRUE((std::same_as<decltype(entry), std::tuple<EntityId, const int&>>));
+            auto [id, intVal] = entry;
+
             actual.emplace(id);
 
             tmpint = (id * 331) -  43;

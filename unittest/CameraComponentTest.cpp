@@ -8,26 +8,14 @@
 #include <ranges>
 
 TEST(CameraComponent, CorrectProjectionAspect) {
-    auto comp = CameraComponent{
-        .fov = 90.0f,
-        .aspect = 1.0f,
-        .nearZ = 0.1f,
-        .farZ = 100.0f
-    };
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+    auto comp = CameraComponent{ .fov = 90.0F, .aspect = 1.0F, .nearZ = 0.1F, .farZ = 100.0F };
+    EXPECT_NEAR(comp.GetProjection()[0][0], 1.0F, 1e-5F);
+    EXPECT_NEAR(comp.GetProjection()[1][1], 1.0F, 1e-5F);
 
-
-    EXPECT_NEAR(comp.GetProjection()[0][0], 1.0f, 1e-5f);
-    EXPECT_NEAR(comp.GetProjection()[1][1], 1.0f, 1e-5f);
-
-    comp = CameraComponent{
-        .fov = 90.0f,
-        .aspect = 3.654732f,
-        .nearZ = 0.1f,
-        .farZ = 100.0f
-    };
-
-
-    EXPECT_NEAR(comp.GetProjection()[0][0], 1.0f / 3.654732f, 1e-5f);
-    EXPECT_NEAR(comp.GetProjection()[1][1], 1.0f, 1e-5f);
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+    comp = CameraComponent{ .fov = 90.0F, .aspect = 3.654732F, .nearZ = 0.1F, .farZ = 100.0F };
+    EXPECT_NEAR(comp.GetProjection()[0][0], 1.0F / 3.654732F, 1e-5F);
+    EXPECT_NEAR(comp.GetProjection()[1][1], 1.0F, 1e-5F);
 }
 

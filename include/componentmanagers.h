@@ -2,7 +2,6 @@
 
 #include <concepts>
 #include <cstdint>
-#include <type_traits>
 
 using EntityId = std::uint32_t;
 
@@ -13,7 +12,7 @@ concept ComponentManager = requires {
 
 template <typename CompM, typename Comp>
 concept ComponentManagerFor = ComponentManager<CompM> 
-    && std::is_same_v<typename CompM::ComponentType, Comp>;
+    && std::same_as<typename CompM::ComponentType, Comp>;
 
 template <typename ECS, typename Comp>
 concept SupportsComponent = ECS::template HasComponentManager<Comp>();

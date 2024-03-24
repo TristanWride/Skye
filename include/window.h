@@ -8,14 +8,19 @@
 #include <memory>
 
 class Window {
-public:
+private:
     Window();
-
-    [[nodiscard]] auto GetAspectRatio() const noexcept -> float;
-    auto Destroy() noexcept -> void;
 
     std::unique_ptr<GLFWwindow, decltype([](GLFWwindow* window) {
         DebugMessage("INFO", "Destroying window");
         glfwDestroyWindow(window);
     })> window;
+
+    [[nodiscard]] static auto GetInstance() noexcept -> Window&;
+
+public:
+    static void Initialize();
+    static void Terminate() noexcept;
+    [[nodiscard]] static auto GetWindow() noexcept -> GLFWwindow*;
+    [[nodiscard]] static auto GetAspectRatio() noexcept -> float;
 };

@@ -5,11 +5,9 @@
 
 #include <string_view>
 
-using namespace std::string_view_literals;
-
 TEST(MeshTest, TriangleParse) {
 
-    auto mesh = Mesh::ReadObj(
+    auto mesh = Mesh::ReadObj(std::string_view{
 R"(# Blender 4.0.2
 # www.blender.org
 o Plane
@@ -21,7 +19,7 @@ vn -0.0000 1.0000 -0.0000
 vn -0.0000 0.9999 -0.0121
 s 0
 f 1//1 2//3 3//2
-)"sv);
+)"});
     
     EXPECT_EQ(mesh.vertices.size(), 3);
     
@@ -35,7 +33,7 @@ f 1//1 2//3 3//2
 }
 TEST(MeshTest, QuadParse) {
 
-    auto mesh = Mesh::ReadObj(
+    auto mesh = Mesh::ReadObj(std::string_view{
 R"(# Blender 4.0.2
 # www.blender.org
 o Plane
@@ -49,7 +47,7 @@ vn -0.0000 0.9999 -0.0121
 s 0
 f 1//1 2//3 3//2
 f 3//1 2//1 4//2
-)"sv);
+)"});
     
     EXPECT_EQ(mesh.vertices.size(), 6);
     

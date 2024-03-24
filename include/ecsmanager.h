@@ -103,14 +103,26 @@ public:
 
     template <typename Comp>
     requires SupportsComponent<ECSManager<CMs...>, Comp>
-    [[nodiscard]] auto&& GetComponent(this auto&& self, EntityId id) {
-        return std::get<ComponentIndex<Comp>()>(std::forward<decltype(self)>(self).componentManagers).Get(id);
+    [[nodiscard]] auto& GetComponent(EntityId id) {
+        return std::get<ComponentIndex<Comp>()>(componentManagers).Get(id);
     }
 
     template <typename Comp>
     requires SupportsComponent<ECSManager<CMs...>, Comp>
-    [[nodiscard]] auto&& GetComponentManager(this auto&& self) {
-        return std::get<ComponentIndex<Comp>()>(std::forward<decltype(self)>(self).componentManagers);
+    [[nodiscard]] const auto& GetComponent(EntityId id) const {
+        return std::get<ComponentIndex<Comp>()>(componentManagers).Get(id);
+    }
+
+    template <typename Comp>
+    requires SupportsComponent<ECSManager<CMs...>, Comp>
+    [[nodiscard]] auto& GetComponentManager() {
+        return std::get<ComponentIndex<Comp>()>(componentManagers);
+    }
+
+    template <typename Comp>
+    requires SupportsComponent<ECSManager<CMs...>, Comp>
+    [[nodiscard]] const auto& GetComponentManager() const {
+        return std::get<ComponentIndex<Comp>()>(componentManagers);
     }
 
     template <typename Comp, typename... Args>
@@ -122,18 +134,35 @@ public:
 
     template <typename... Comps>
     requires SupportsComponents<ECSManager<CMs...>, Comps...>
-    [[nodiscard]] auto GetAll(this auto&& self) {
+    [[nodiscard]] auto GetAll() {
         static constexpr auto compBitset = MakeComponentBitset<Comps...>();
-        return std::forward<decltype(self)>(self).entityBits
+        return entityBits
             | std::views::enumerate
             | std::views::filter([](const auto& entity) {
                 const auto& entityBits = std::get<1>(entity);
                 if (!entityBits.has_value()) return false;
                 return (compBitset & entityBits.value()) == compBitset;
             })
-            | std::views::transform([&self](const auto& entity) {
+            | std::views::transform([&](const auto& entity) {
                 auto id = static_cast<EntityId>(std::get<0>(entity));
-                return std::make_tuple(id, std::ref(std::forward<decltype(self)>(self).GetComponent<Comps>(id))...);
+                return std::make_tuple(id, std::ref(GetComponent<Comps>(id))...);
+            });
+    }
+
+    template <typename... Comps>
+    requires SupportsComponents<ECSManager<CMs...>, Comps...>
+    [[nodiscard]] auto GetAll() const {
+        static constexpr auto compBitset = MakeComponentBitset<Comps...>();
+        return entityBits
+            | std::views::enumerate
+            | std::views::filter([](const auto& entity) {
+                const auto& entityBits = std::get<1>(entity);
+                if (!entityBits.has_value()) return false;
+                return (compBitset & entityBits.value()) == compBitset;
+            })
+            | std::views::transform([&](const auto& entity) {
+                auto id = static_cast<EntityId>(std::get<0>(entity));
+                return std::make_tuple(id, std::cref(GetComponent<Comps>(id))...);
             });
     }
 
@@ -154,9 +183,8 @@ struct BasicCompManager {
         return *iter;
     }
 
-    [[nodiscard]] auto&& Get(this auto&& self, EntityId id) {
-        return std::forward<decltype(self)>(self).map.at(id);
-    }
+    [[nodiscard]] auto& Get(EntityId id) { return map.at(id); }
+    [[nodiscard]] const auto& Get(EntityId id) const { return map.at(id); }
 
     [[nodiscard]] auto HasEntity(EntityId id) const -> bool {
         auto iter = map.find(id);
