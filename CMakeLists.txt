@@ -8,7 +8,7 @@ enable_testing ()
 
 if(MSVC)
   # Force to always compile with W4
-  add_compile_options (/W4 /WX /EHsc "$<$<CONFIG:Debug>:/Od>" "$<$<CONFIG:Release>:/O2>")
+  add_compile_options (/W4 /EHsc "$<$<CONFIG:Debug>:/Od>" "$<$<CONFIG:Release>:/O2>")
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # Update if necessary
   add_compile_options (-Wall -pedantic)

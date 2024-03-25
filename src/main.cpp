@@ -1,5 +1,6 @@
 #include "cameracomponent.h"
 #include "ecsmanager.h"
+#include "inputcomponent.h"
 #include "meshcomponent.h"
 #include "renderer.h"
 #include "transformcomponent.h"
@@ -17,6 +18,11 @@ auto main() noexcept -> int {
         BasicCompManager<CameraComponent>,
         BasicCompManager<TransformComponent>
     >{};
+
+    GLFWInputAdapter::Initialize(Window::GetWindow());
+    auto inputSystem = InputSystem{GLFWInputAdapter::GetInstance()};
+    auto dbgIC = DebugInputComponent{};
+    inputSystem.RegisterInputComponent(dbgIC);
 
     auto renderer = Renderer{ecs};
     auto renderMesh = ecs.NewEntity().value(); // NOLINT

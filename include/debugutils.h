@@ -35,12 +35,12 @@ template <class S, class T>
     throw std::runtime_error(messageStr);
 }
 
-template <class S, class F, class... Args>
-auto DebugFmtMessage(S&& debugLevel, F&& format, Args&&... args) noexcept -> void {
-    DebugMessage(std::forward<S>(debugLevel), std::format(std::forward<F>(format), std::forward<Args>(args)...));
+template <class S, class... Args>
+auto DebugFmtMessage(S&& debugLevel, std::format_string<Args...> format, Args&&... args) noexcept -> void {
+    DebugMessage(std::forward<S>(debugLevel), std::format(format, std::forward<Args>(args)...));
 }
 
-template <class S, class F, class... Args>
-auto ThrowFmtMessage(S&& debugLevel, F&& format, Args&&... args) noexcept -> void {
-    ThrowMessage(std::forward<S>(debugLevel), std::format(std::forward<F>(format), std::forward<Args>(args)...));
+template <class S, class... Args>
+auto ThrowFmtMessage(S&& debugLevel, std::format_string<Args...> format, Args&&... args) noexcept -> void {
+    ThrowMessage(std::forward<S>(debugLevel), std::format(format, std::forward<Args>(args)...));
 }
