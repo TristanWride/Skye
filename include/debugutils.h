@@ -1,9 +1,8 @@
 #pragma once
 
-#ifndef NDEBUG
 #include <print>
 #include <utility>
-#endif
+#include <stdexcept>
 
 #ifndef NDEBUG
 inline static constexpr bool DebugRunning = true;
@@ -12,7 +11,7 @@ inline static constexpr bool DebugRunning = false;
 #endif
 
 template <class S, class T>
-auto DebugMessage(S&& debugLevel, T&& message) noexcept -> void {
+auto DebugMessage([[maybe_unused]] S&& debugLevel, [[maybe_unused]] T&& message) noexcept -> void {
     if constexpr (DebugRunning) {
         std::println(
             "[{:<7}]: {}", 
@@ -22,25 +21,33 @@ auto DebugMessage(S&& debugLevel, T&& message) noexcept -> void {
     } 
 }
 
-template <class S, class T>
-[[noreturn]] auto ThrowMessage(S&& debugLevel, T&& message) -> void {
-    const auto messageStr = std::format(
-            "[{:<7}]: {}", 
-            std::forward<S>(debugLevel), 
-            std::forward<T>(message)
-    );
-
-    if constexpr (DebugRunning) std::println("{}", messageStr);
-    
-    throw std::runtime_error(messageStr);
-}
-
 template <class S, class... Args>
-auto DebugFmtMessage(S&& debugLevel, std::format_string<Args...> format, Args&&... args) noexcept -> void {
+auto DebugMessage(S&& debugLevel, std::format_string<Args...> format, Args&&... args) noexcept -> void {
     DebugMessage(std::forward<S>(debugLevel), std::format(format, std::forward<Args>(args)...));
 }
 
+template <class S, class T>
+[[noreturn]] auto ThrowMessage([[maybe_unused]] S&& debugLevel, T&& message) -> void {
+    if constexpr (DebugRunning) std::println("[{:<7}]: {}", std::forward<S>(debugLevel), message);
+    
+    throw std::runtime_error(message);
+}
+
 template <class S, class... Args>
-auto ThrowFmtMessage(S&& debugLevel, std::format_string<Args...> format, Args&&... args) noexcept -> void {
+[[noreturn]] auto ThrowMessage(S&& debugLevel, std::format_string<Args...> format, Args&&... args) noexcept -> void {
     ThrowMessage(std::forward<S>(debugLevel), std::format(format, std::forward<Args>(args)...));
+}
+
+template <class S, class... Args>
+[[noreturn]] auto DebugOnlyThrowMessage([[maybe_unused]] S&& debugLevel, [[maybe_unused]] std::format_string<Args...> format, [[maybe_unused]] Args&&... args) -> void {
+    if constexpr (DebugRunning) ThrowMessage(std::forward<S>(debugLevel), format, std::forward<Args>(args)...);
+
+    std::unreachable();
+}
+
+template <class S, class T>
+[[noreturn]] auto DebugOnlyThrowMessage([[maybe_unused]] S&& debugLevel, [[maybe_unused]] T&& message) -> void {
+    if constexpr (DebugRunning) ThrowMessage(std::forward<S>(debugLevel), std::forward<T>(message));
+
+    std::unreachable();
 }

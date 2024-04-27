@@ -46,7 +46,7 @@ public:
     }
 
     inline void RegisterInputComponent(InputComponent& component) {
-        if (window == nullptr) { ThrowMessage("ERROR", "Trying to register input with no window set"); }
+        if (window == nullptr) ThrowMessage("ERROR", "Trying to register input with no window set");
 
         currentComponent = &component;
 
@@ -84,11 +84,11 @@ struct DebugInputComponent : public InputComponent {
             
             return "UNKNOWN";
         }();
-        if (name != nullptr) { DebugFmtMessage("INFO", "[{:<10}] : [{:<10}]   [{:<10}]", "KEY_INPUT", name, actionName); }
+        if (name != nullptr) { DebugMessage("INFO", "[{:<10}] : [{:<10}]   [{:<10}]", "KEY_INPUT", name, actionName); }
     }
 
     inline void MousePosCallback(double xPos, double yPos) noexcept override {
-        DebugFmtMessage("INFO", "[{:<10}] : [{:<10.5}]   [{:<10.5}]", "CURSOR", xPos, yPos); 
+        DebugMessage("INFO", "[{:<10}] : [{:<10.5}]   [{:<10.5}]", "CURSOR", xPos, yPos); 
     }
 
     inline void MouseBtnCallback(int button, int action, [[maybe_unused]] int mods) noexcept override {
@@ -99,10 +99,10 @@ struct DebugInputComponent : public InputComponent {
             
             return "UNKNOWN";
         }();
-        DebugFmtMessage("INFO", "[{:10}] : [{:<10}]   [{:<10}]", "MOUSE_BTN", button, actionName);
+        DebugMessage("INFO", "[{:10}] : [{:<10}]   [{:<10}]", "MOUSE_BTN", button, actionName);
     }
 
     inline void MouseScrollCallback(double xScroll, double yScroll) noexcept override {
-        DebugFmtMessage("INFO", "[{:<10}] : [{:<10.5}]   [{:<10.5}]", "SCROLL", xScroll, yScroll); 
+        DebugMessage("INFO", "[{:<10}] : [{:<10.5}]   [{:<10.5}]", "SCROLL", xScroll, yScroll); 
     }
 };

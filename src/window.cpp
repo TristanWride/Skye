@@ -15,7 +15,7 @@ constexpr unsigned int WINDOW_WIDTH = 1600U;
 constexpr unsigned int WINDOW_HEIGHT = 900U;
 
 void ErrorCallback(int error, const char* description) noexcept {
-    DebugMessage("ERROR", std::format("error code {}: {}", error, description));
+    DebugMessage("ERROR", "error code {}: {}", error, description);
 }
 
 auto GlobalCleanup() noexcept -> void {

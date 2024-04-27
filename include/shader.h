@@ -44,7 +44,7 @@ struct ShaderProgram {
                 glGetProgramiv(programHandle, GL_INFO_LOG_LENGTH, &infoLogLength);
                 auto infoLog = std::string(infoLogLength, '\0');
                 glGetProgramInfoLog(programHandle, infoLogLength, NULL, &infoLog[0]);
-                ThrowMessage("ERROR", std::format("Shader linking error:\n{}", infoLog));
+                ThrowMessage("ERROR", "Shader linking error:\n{}", infoLog);
             }
         }; 
 

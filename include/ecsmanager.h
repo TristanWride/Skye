@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 #include <unordered_map>
+#include <memory>
 
 static constexpr auto MAX_NUM_ENTITIES = EntityId{10'000};
 

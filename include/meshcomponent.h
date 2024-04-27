@@ -77,7 +77,7 @@ struct Mesh {
                     std::back_inserter(mesh.vertices)
                 );
             } else {
-                DebugMessage("WARN", std::format("Encountered unknown row type {}", rowType));
+                DebugMessage("WARN", "Encountered unknown row type {}", rowType);
             }
         }
 

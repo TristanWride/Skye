@@ -35,7 +35,7 @@ struct Renderer {
         auto view = cameraTransform.GetInverseTransform();
         auto proj = camera.GetProjection();
 
-        for (auto&& [id, meshComponent] : ecs.GetAll<MeshComponent>()) {
+        for (auto [id, meshComponent] : ecs.GetAll<MeshComponent>()) {
             glUseProgram(shaderProgram.programHandle);
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(view));
             glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(proj));

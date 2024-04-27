@@ -10,7 +10,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-auto main() noexcept -> int {
+auto main() noexcept -> int try {
     Window::Initialize();
 
     auto ecs = ECSManager<
@@ -49,4 +49,6 @@ auto main() noexcept -> int {
     }
 
     return 0;
+} catch (const std::runtime_error& e) {
+    DebugMessage("CRASH", e.what());
 }

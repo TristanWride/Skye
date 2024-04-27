@@ -13,7 +13,7 @@ Shader::Shader(const char* fileName, GLenum shaderType) {
     auto shaderFile = std::ifstream(fileName, std::ifstream::ate);
 
     if (!shaderFile.is_open()) {
-        DebugMessage("ERROR", std::format("Couldn't open file \"{}\"", fileName));
+        DebugMessage("ERROR", "Couldn't open file \"{}\"", fileName);
         return;
     }
 
@@ -35,7 +35,7 @@ Shader::Shader(const char* fileName, GLenum shaderType) {
         glGetShaderiv(shaderHandle, GL_INFO_LOG_LENGTH, &infoLogLength);
         auto infoLog = std::string(infoLogLength, '\0');
         glGetShaderInfoLog(shaderHandle, infoLogLength, nullptr, infoLog.data());
-        DebugMessage("ERROR", std::format("Shader compilation error:\n{}", infoLog));
+        DebugMessage("ERROR", "Shader compilation error:\n{}", infoLog);
         shaderHandle = 0U;
         return;
     }

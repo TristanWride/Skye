@@ -14,11 +14,11 @@
 
 
 auto Mesh::ReadObj(const char* filePath) -> Mesh {
-    DebugMessage("INFO", std::format("Reading object file \"{}\"", filePath));
+    DebugMessage("INFO", "Reading object file \"{}\"", filePath);
     auto inputFile = std::ifstream(filePath);
 
     if (!inputFile.is_open()) {
-        DebugMessage("ERROR", std::format("Failed to open file \"{}\"", filePath));
+        DebugMessage("ERROR", "Failed to open file \"{}\"", filePath);
         return Mesh{};
     }
 
