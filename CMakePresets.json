@@ -19,6 +19,39 @@
             }
         },
         {
+            "name": "linux-base",
+            "displayName": "linux-base",
+            "description": "Base configuration for linux builds",
+            "generator": "Ninja",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "linux-x64-debug",
+            "displayName": "linux-x64-debug",
+            "inherits": "linux-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "linux-x64-release",
+            "displayName": "linux-x64-release",
+            "inherits": "linux-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
             "name": "x64-debug",
             "displayName": "x64-debug",
             "inherits": "base",
@@ -45,6 +78,16 @@
             "name": "x64-release",
             "displayName": "x64-release",
             "configurePreset": "x64-release"
+        },
+        {
+            "name": "linux-x64-debug",
+            "displayName": "linux-x64-debug",
+            "configurePreset": "linux-x64-debug"
+        },
+        {
+            "name": "linux-x64-release",
+            "displayName": "linux-x64-release",
+            "configurePreset": "linux-x64-release"
         }
     ]
 }
