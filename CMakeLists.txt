@@ -14,22 +14,6 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   add_compile_options (-Wall -pedantic)
 endif()
 
-# GLFW dependency
-set (GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set (GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set (GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory ("${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glfw-3.3.9")
-
-# Glad Dependency
-add_subdirectory ("${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glad")
-
-# GLM Dependency
-add_library (glm INTERFACE)
-target_include_directories (glm INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glm")
-
-# GoogleTest Dependency
-add_subdirectory ("${CMAKE_CURRENT_SOURCE_DIR}/dependencies/googletest-1.14.0")
-
 # Library
 add_library (vislib STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
