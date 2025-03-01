@@ -5,7 +5,6 @@
 #include <gtest/gtest.h>
 
 #include <print>
-#include <ranges>
 
 TEST(CameraComponent, CorrectProjectionAspect) {
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)

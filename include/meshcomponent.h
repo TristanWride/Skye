@@ -3,7 +3,6 @@
 #include "debugutils.h"
 
 #include <glm/glm.hpp>
-#include <glad/glad.h>
 
 #include <algorithm>
 #include <string>
@@ -85,15 +84,3 @@ struct Mesh {
     }
 };
 
-struct MeshComponent {
-    GLuint vbo = 0u;
-    GLuint vao = 0u;
-    unsigned int numVertices;
-
-    [[nodiscard]] MeshComponent(const Mesh& mesh) noexcept;
-
-    [[nodiscard]] MeshComponent& operator=(MeshComponent&& other) noexcept;
-    [[nodiscard]] MeshComponent(MeshComponent&& other) noexcept;
-
-    ~MeshComponent() noexcept;
-};

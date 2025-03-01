@@ -2,8 +2,6 @@ cmake_minimum_required (VERSION 3.27)
 
 project (PersonalProjectKnit)
 
-set (CMAKE_CXX_STANDARD 23)
-
 enable_testing ()
 
 if(MSVC)
@@ -14,18 +12,21 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   add_compile_options (-Wall -pedantic)
 endif()
 
+# Dependencies
+add_subdirectory ("${CMAKE_CURRENT_SOURCE_DIR}/dependencies")
+
 # Library
 add_library (vislib STATIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/meshcomponent.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/window.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/shader.cpp"
 )
+
+target_compile_features (vislib PUBLIC cxx_std_23)
 
 target_include_directories (vislib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries (vislib 
     PUBLIC glfw 
-    PUBLIC glad 
     PUBLIC glm
 )
 

@@ -2,14 +2,10 @@
 
 #include "debugutils.h"
 
-#include <glad/glad.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include <format>
-
-constexpr unsigned int OPENGL_MAJOR_VERSION = 4U;
-constexpr unsigned int OPENGL_MINOR_VERSION = 6U;
 
 constexpr unsigned int WINDOW_WIDTH = 1600U;
 constexpr unsigned int WINDOW_HEIGHT = 900U;
@@ -20,10 +16,6 @@ void ErrorCallback(int error, const char* description) noexcept {
 
 auto GlobalCleanup() noexcept -> void {
     glfwTerminate();
-}
-
-auto FrameBufferSizeCallback([[maybe_unused]] GLFWwindow* window, int width, int height) noexcept -> void {
-    glViewport(0, 0, width, height);
 }
 
 Window::Window()
@@ -43,8 +35,8 @@ void Window::Initialize() {
     if (glfwInit() != GLFW_TRUE) { ThrowMessage("ERROR", "Failed to initialize GLFW"); }
     glfwSetErrorCallback(ErrorCallback);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_MAJOR_VERSION);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_MINOR_VERSION);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     auto& window = GetInstance();
@@ -53,14 +45,11 @@ void Window::Initialize() {
 
     glfwMakeContextCurrent(GetWindow());
 
-    if (!static_cast<bool>(gladLoadGL())) { ThrowMessage("ERROR", "Failed to initialise GLAD"); }
-
-    glfwSetFramebufferSizeCallback(GetWindow(), &FrameBufferSizeCallback);
     glfwSwapInterval(1);
 }
 
 void Window::Terminate() noexcept {
-    (void) GetInstance().window.release();
+    GetInstance().window.reset();
 }
 
 auto Window::GetWindow() noexcept -> GLFWwindow* {

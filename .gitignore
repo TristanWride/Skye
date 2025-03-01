@@ -1,5 +1,7 @@
 build
+.cache
 data
 out
 .vscode
 .vs
+compile_commands.json
