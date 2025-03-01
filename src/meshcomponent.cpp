@@ -1,6 +1,5 @@
-#include "meshcomponent.h"
-
-#include "debugutils.h"
+#include "meshcomponent.hpp"
+#include "debugutils.hpp"
 
 #include <bit>
 #include <cstddef>

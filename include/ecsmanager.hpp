@@ -1,7 +1,7 @@
 #pragma once
 
-#include "componentmanagers.h"
-#include "debugutils.h"
+#include "componentmanagers.hpp"
+#include "debugutils.hpp"
 
 #include <bitset>
 #include <concepts>

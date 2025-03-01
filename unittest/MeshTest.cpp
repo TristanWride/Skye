@@ -1,5 +1,5 @@
-#include "meshcomponent.h"
-#include "GLMTestHelpers.h"
+#include "meshcomponent.hpp"
+#include "GLMTestHelpers.hpp"
 
 #include <gtest/gtest.h>
 
@@ -20,9 +20,9 @@ vn -0.0000 0.9999 -0.0121
 s 0
 f 1//1 2//3 3//2
 )"});
-    
+
     EXPECT_EQ(mesh.vertices.size(), 3);
-    
+
     GLM_EXPECT_NEAR(mesh.vertices[0].position, glm::vec3(-1.0, 0.0, 1.0), 1e-5);
     GLM_EXPECT_NEAR(mesh.vertices[1].position, glm::vec3( 1.0, 0.0, 1.0), 1e-5);
     GLM_EXPECT_NEAR(mesh.vertices[2].position, glm::vec3(-1.0, 0.0,-1.0), 1e-5);

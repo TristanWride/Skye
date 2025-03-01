@@ -1,6 +1,6 @@
-#include "ecsmanager.h"
-#include "inputcomponent.h"
-#include "window.h"
+#include "ecsmanager.hpp"
+#include "inputcomponent.hpp"
+#include "window.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>

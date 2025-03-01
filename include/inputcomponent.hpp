@@ -1,5 +1,6 @@
 #pragma once
-#include "debugutils.h"
+
+#include "debugutils.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>

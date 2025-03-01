@@ -1,6 +1,6 @@
 #pragma once
 
-#include "debugutils.h"
+#include "debugutils.hpp"
 
 #include <glm/glm.hpp>
 

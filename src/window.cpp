@@ -1,6 +1,5 @@
-#include "window.h"
-
-#include "debugutils.h"
+#include "debugutils.hpp"
+#include "window.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>

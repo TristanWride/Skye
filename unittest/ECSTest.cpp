@@ -1,6 +1,5 @@
-#include "ecsmanager.h"
-
-#include "componentmanagers.h"
+#include "ecsmanager.hpp"
+#include "componentmanagers.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

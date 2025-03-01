@@ -1,7 +1,6 @@
-#include "cameracomponent.h"
+#include "cameracomponent.hpp"
 
 #include <glm/glm.hpp>
-
 #include <gtest/gtest.h>
 
 #include <print>

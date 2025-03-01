@@ -4,6 +4,8 @@ project (PersonalProjectKnit)
 
 enable_testing ()
 
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 if(MSVC)
   # Force to always compile with W4
   add_compile_options (/W4 /EHsc "$<$<CONFIG:Debug>:/Od>" "$<$<CONFIG:Debug>:/fsanitize=address>" "$<$<CONFIG:Release>:/O2>")
