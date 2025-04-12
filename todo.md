@@ -4,7 +4,5 @@
 - cmake modernization
 - cmake dependency management
 
-- mesh loading (assimp)
-- mesh rendering (vulkan)
-    - draw triangle
-    - ...
+- mesh loading
+- mesh viewer
