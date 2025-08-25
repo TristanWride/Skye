@@ -8,12 +8,13 @@
 #include <concepts>
 
 struct InputComponent {
-    virtual inline void OnAttach() noexcept {}
-    virtual inline void KeyCallback([[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) noexcept {}
-    virtual inline void CharCallback([[maybe_unused]] unsigned int c) noexcept {}
-    virtual inline void MousePosCallback([[maybe_unused]] double xPos, [[maybe_unused]] double yPos) noexcept {}
-    virtual inline void MouseBtnCallback([[maybe_unused]] int button, [[maybe_unused]] int action, [[maybe_unused]] int mods) noexcept {}
-    virtual inline void MouseScrollCallback([[maybe_unused]] double xScroll, [[maybe_unused]] double yScroll) noexcept {}
+    virtual void OnAttach() {}
+    virtual void KeyCallback([[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {}
+    virtual void CharCallback([[maybe_unused]] unsigned int c) {}
+    virtual void MousePosCallback([[maybe_unused]] double xPos, [[maybe_unused]] double yPos) {}
+    virtual void MouseBtnCallback([[maybe_unused]] int button, [[maybe_unused]] int action, [[maybe_unused]] int mods) {}
+    virtual void MouseScrollCallback([[maybe_unused]] double xScroll, [[maybe_unused]] double yScroll) {}
+    virtual ~InputComponent() = default;
 };
 
 struct GLFWInputAdapter {

@@ -1,11 +1,7 @@
-# GLFW dependency
-set (GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set (GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set (GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory ("${CMAKE_CURRENT_SOURCE_DIR}/glfw")
+add_subdirectory(SDL EXCLUDE_FROM_ALL)
 
 # GoogleTest dependency
-add_subdirectory ("${CMAKE_CURRENT_SOURCE_DIR}/googletest")
+add_subdirectory (googletest EXCLUDE_FROM_ALL)
 
 # GLM Dependency
 add_library (glm INTERFACE)

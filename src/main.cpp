@@ -2,10 +2,12 @@
 #include "inputcomponent.hpp"
 #include "window.hpp"
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#define SDL_MAIN_USE_CALLBACKS
+#include <SDL3/SDL_main.h>
 
 #include <stdexcept>
+
+
 
 auto main() noexcept -> int try {
     Window::Initialize();

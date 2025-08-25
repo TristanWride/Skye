@@ -28,7 +28,7 @@ target_compile_features (vislib PUBLIC cxx_std_23)
 
 target_include_directories (vislib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries (vislib 
-    PUBLIC glfw 
+    PUBLIC SDL3::SDL3 
     PUBLIC glm
 )
 
