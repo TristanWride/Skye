@@ -1,0 +1,2 @@
+package_add_test (entity_registry_test entity_registry_test.cpp)
+package_add_test (id_allocator_test id_allocator_test.cpp)
