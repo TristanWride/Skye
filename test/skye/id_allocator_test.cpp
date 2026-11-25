@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <string_view>
 #include <tuple>
 
 TEST( IDAllocatorTest, StartsAtFirstID ) {
@@ -42,6 +43,17 @@ TEST( IDAllocatorTest, FailsWhenFull ) {
     std::ignore = ids.CreateID();
 
   EXPECT_THROW( std::ignore = ids.CreateID(), skye::util::Failure );
+}
+
+TEST( IDAllocatorTest, ErrorsPrintSmallIDsAsNumbers ) {
+  auto ids = skye::IDAllocator<uint8_t>{};
+  try {
+    ids.DestroyID( 65 );
+    FAIL() << "DestroyID should have thrown";
+  } catch ( const skye::util::Failure & failure ) {
+    const std::string_view message = failure.what();
+    EXPECT_NE( message.find( "ID 65 has never been allocated." ), std::string_view::npos ) << message;
+  }
 }
 
 TEST( IDAllocatorTest, RejectsMaxIDsLargerThanType ) {

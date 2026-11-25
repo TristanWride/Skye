@@ -65,11 +65,11 @@ public:
     auto lock = std::lock_guard{ mutex_ };
 
     if ( id >= entries_.size() )
-      util::Fail( "ID {} has never been allocated.", id );
+      util::Fail( "ID {:d} has never been allocated.", id );
 
     Entry & entry = entries_[id];
     if ( !entry.isActive )
-      util::Fail( "ID {} is not active and cannot be destroyed.", id );
+      util::Fail( "ID {:d} is not active and cannot be destroyed.", id );
 
     entry.isActive   = false;
     entry.nextFreeID = firstFreeID_;
