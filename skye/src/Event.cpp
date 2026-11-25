@@ -4,8 +4,8 @@
 
 namespace skye {
 
-EventID EventSystem::GenerateEventID() {
-  return eventIDs_.CreateID();
+EventType EventSystem::GenerateEventType() {
+  return eventTypes_.CreateID();
 }
 
 EventSystem::ListenerID EventSystem::RegisterListener( Listener * listener ) {

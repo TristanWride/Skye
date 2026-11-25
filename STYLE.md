@@ -6,7 +6,7 @@
 
 | Thing | Rule | Example |
 |---|---|---|
-| Functions (free and member) | PascalCase | `GenerateEventID()` |
+| Functions (free and member) | PascalCase | `CreateEntity()` |
 | Types, aliases, enums | PascalCase | `EntityRegistry`, `EntityID` |
 | Enum values | PascalCase | `EventKind::KeyDown` |
 | Locals, parameters | camelCase | `entityID` |
