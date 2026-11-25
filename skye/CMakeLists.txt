@@ -1,5 +1,6 @@
 add_library(skye STATIC
   src/Entity.cpp
+  src/Event.cpp
   src/Util.cpp
 )
 target_include_directories(skye PUBLIC include)
