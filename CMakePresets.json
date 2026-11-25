@@ -68,13 +68,14 @@
                 "CMAKE_ARCHIVE_OUTPUT_DIRECTORY": "${sourceDir}/out/build/${presetName}/$<CONFIG>/lib",
                 "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/out/build/${presetName}/$<CONFIG>/lib",
                 "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/out/build/${presetName}/$<CONFIG>/bin",
-                "CMAKE_CXX_FLAGS_RELEASE": "/O2 /DNDEBUG /Wall /EHsc",
-                "CMAKE_C_FLAGS_RELEASE": "/O2 /DNDEBUG /Wall /EHsc",
-                "CMAKE_CXX_FLAGS_DEBUG": "/Od /Wall /EHsc",
-                "CMAKE_C_FLAGS_DEBUG": "/Od /Wall /EHsc",
-                "CMAKE_CXX_FLAGS_ASAN": "/Od /fsanitize=address /Wall /EHsc",
-                "CMAKE_C_FLAGS_ASAN": "/Od /fsanitize=address /Wall /EHsc",
-                "CMAKE_EXE_LINKER_FLAGS_ASAN": "/fsanitize=address"
+                "CMAKE_CXX_FLAGS_RELEASE": "/O2 /DNDEBUG /W4 /EHsc",
+                "CMAKE_C_FLAGS_RELEASE": "/O2 /DNDEBUG /W4 /EHsc",
+                "CMAKE_CXX_FLAGS_DEBUG": "/Od /W4 /EHsc",
+                "CMAKE_C_FLAGS_DEBUG": "/Od /W4 /EHsc",
+                "CMAKE_CXX_FLAGS_ASAN": "/Od /Zi /fsanitize=address /W4 /EHsc",
+                "CMAKE_C_FLAGS_ASAN": "/Od /Zi /fsanitize=address /W4 /EHsc",
+                "CMAKE_EXE_LINKER_FLAGS_ASAN": "/DEBUG /INCREMENTAL:NO",
+                "CMAKE_SHARED_LINKER_FLAGS_ASAN": "/DEBUG /INCREMENTAL:NO"
             }
         }
     ],
@@ -114,15 +115,18 @@
     "testPresets": [
         {
             "name": "linux-gcc",
-            "configurePreset": "linux-gcc"
+            "configurePreset": "linux-gcc",
+            "configuration": "Debug"
         },
         {
             "name": "linux-clang",
-            "configurePreset": "linux-clang"
+            "configurePreset": "linux-clang",
+            "configuration": "Debug"
         },
         {
             "name": "windows-msvc",
-            "configurePreset": "windows-msvc"
+            "configurePreset": "windows-msvc",
+            "configuration": "Debug"
         },
         {
             "name": "windows-msvc-debug",

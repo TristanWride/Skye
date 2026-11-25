@@ -1,5 +1,5 @@
-enable_testing()
-include (GoogleTest)
+# Use the DLL C runtime (/MD) like the rest of the project, otherwise MSVC fails to link (LNK2038).
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory (googletest EXCLUDE_FROM_ALL)
 
 mark_as_advanced(
