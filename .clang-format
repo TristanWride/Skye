@@ -1,0 +1,80 @@
+# Skye formatting rules. See STYLE.md for the rules clang-format cannot enforce.
+Language: Cpp
+Standard: Latest
+
+# Indentation
+IndentWidth: 2
+ContinuationIndentWidth: 2
+UseTab: Never
+AccessModifierOffset: -2
+NamespaceIndentation: None
+IndentCaseLabels: true
+
+# No hard line limit: existing line breaks are kept
+ColumnLimit: 0
+
+# Braces on the same line everywhere
+BreakBeforeBraces: Attach
+
+# Constructor initialiser lists: leading commas, one per line
+BreakConstructorInitializers: BeforeComma
+PackConstructorInitializers: Never
+ConstructorInitializerIndentWidth: 2
+
+# Short forms
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortLambdasOnASingleLine: All
+
+# Spaces inside non-empty parentheses: Fail( "x", id ), if ( x ), Foo()
+SpaceBeforeParens: ControlStatements
+SpacesInParens: Custom
+SpacesInParensOptions:
+  InConditionalStatements: true
+  Other: true
+  InEmptyParentheses: false
+  InCStyleCasts: false
+SpacesInSquareBrackets: false
+SpacesInAngles: Never
+
+# Spaces inside braced initialisers: { 0 }
+Cpp11BracedListStyle: false
+
+# Pointers and references spaced on both sides: char * x, const T & y
+DerivePointerAlignment: false
+PointerAlignment: Middle
+ReferenceAlignment: Middle
+
+# West const
+QualifierAlignment: Left
+
+# Tabular layout
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveMacros: Consecutive
+AlignTrailingComments: true
+AlignEscapedNewlines: Left
+
+# Includes: own header, project, third-party, std (blank line between groups)
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^"'
+    Priority: 1
+  - Regex: '^<[a-z_]+>$'
+    Priority: 3
+  - Regex: '^<'
+    Priority: 2
+
+# Blank lines
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+EmptyLineBeforeAccessModifier: LogicalBlock
+EmptyLineAfterAccessModifier: Never
+SeparateDefinitionBlocks: Leave
+InsertNewlineAtEOF: true
+
+FixNamespaceComments: false
+ReflowComments: false

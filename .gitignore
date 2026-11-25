@@ -2,3 +2,7 @@
 out/
 Testing/
 compile_commands.json
+
+# Local Claude Code instructions
+.claude/
+CLAUDE.local.md
