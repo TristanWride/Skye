@@ -106,7 +106,7 @@ void EventSystem::NotifyListener( ListenerID listenerID, const Event & event ) {
   }
 
   // Safe to call unlocked: UnregisterListener() can't complete while we hold dispatchMutex_.
-  listener->OnEvent( event.eventID, event.target.payload );
+  listener->OnEvent( event.eventType, event.target.payload );
 }
 
 }

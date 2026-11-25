@@ -30,14 +30,14 @@ public:
 
 EventSystem::Event MakeBroadcast( skye::EventID eventID ) {
   auto event        = EventSystem::Event{};
-  event.eventID     = eventID;
+  event.eventType   = eventID;
   event.target.type = EventSystem::EventTarget::Type::Broadcast;
   return event;
 }
 
 EventSystem::Event MakeChannelEvent( skye::EventID eventID, EventSystem::ChannelID channelID ) {
   auto event                     = EventSystem::Event{};
-  event.eventID                  = eventID;
+  event.eventType                = eventID;
   event.target.type              = EventSystem::EventTarget::Type::Channel;
   event.target.channel.channelID = channelID;
   return event;
@@ -45,7 +45,7 @@ EventSystem::Event MakeChannelEvent( skye::EventID eventID, EventSystem::Channel
 
 EventSystem::Event MakeSingleEvent( skye::EventID eventID, EventSystem::ListenerID listenerID ) {
   auto event                     = EventSystem::Event{};
-  event.eventID                  = eventID;
+  event.eventType                = eventID;
   event.target.type              = EventSystem::EventTarget::Type::Single;
   event.target.single.listenerID = listenerID;
   return event;

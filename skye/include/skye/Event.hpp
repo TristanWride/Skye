@@ -50,9 +50,8 @@ public:
     void * payload;
   };
 
-  // TODO: Rename eventID to eventType
   struct Event {
-    EventID     eventID;
+    EventID     eventType;
     EventTarget target;
   };
 
