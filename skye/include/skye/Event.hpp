@@ -13,7 +13,7 @@ namespace skye {
 
 using EventType = uint32_t;
 
-constexpr static EventType NULL_EVENT = 0u;
+constexpr static EventType NULL_EVENT_TYPE = 0u;
 
 class Listener {
 public:
@@ -63,14 +63,14 @@ private:
   std::mutex           listenersMutex_; // Guards listeners_ and channels_.
   std::mutex           queueMutex_;     // Guards eventQueue_.
 
-  IDAllocator<EventType>                                 eventTypes_{ NULL_EVENT + 1 };
+  IDAllocator<EventType>                                 eventTypes_{ NULL_EVENT_TYPE + 1 };
   IDAllocator<ListenerID>                                listenerIDs_{ 1 };
   std::deque<Event>                                      eventQueue_{};
   std::map<ListenerID, Listener *>                       listeners_{}; // Ordered: broadcasts go out in ID order.
   std::unordered_map<ChannelID, std::vector<ListenerID>> channels_{};
 
 public:
-  // Returns a new unique event type. Never returns NULL_EVENT.
+  // Returns a new unique event type. Never returns NULL_EVENT_TYPE.
   [[nodiscard]] EventType GenerateEventType();
 
   // Registers a listener and returns its ID (never 0), needed to unregister it.
