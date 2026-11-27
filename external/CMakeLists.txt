@@ -1,4 +1,6 @@
-if (SKYE_BUILD_TESTS AND NOT TARGET gtest)
+# Skipped if the consuming project already provides googletest. Its add_subdirectory build
+# defines the GTest::gtest, GTest::gmock, GTest::gtest_main and GTest::gmock_main aliases.
+if (SKYE_BUILD_TESTING AND NOT TARGET GTest::gtest)
   # Use the DLL C runtime (/MD) like the rest of the project, otherwise MSVC fails to link (LNK2038).
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   add_subdirectory (googletest EXCLUDE_FROM_ALL)

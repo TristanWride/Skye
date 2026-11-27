@@ -5,6 +5,13 @@ enable_language (CXX)
 
 option (SKYE_BUILD_TESTS "Build the Skye unit tests" ${PROJECT_IS_TOP_LEVEL})
 option (SKYE_BUILD_EXAMPLES "Build the Skye examples" ${PROJECT_IS_TOP_LEVEL})
+option (SKYE_BUILD_TESTING "Build skye::testing, Skye's googletest-based test helpers for games" ON)
+
+if (SKYE_BUILD_TESTS AND NOT SKYE_BUILD_TESTING)
+  message (FATAL_ERROR
+    "SKYE_BUILD_TESTS=ON requires SKYE_BUILD_TESTING=ON: Skye's tests are built on skye::testing. "
+    "Turn SKYE_BUILD_TESTING on, or turn SKYE_BUILD_TESTS off.")
+endif ()
 
 if (PROJECT_IS_TOP_LEVEL)
   include (CTest)

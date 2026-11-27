@@ -1,6 +1,6 @@
 .cache/
 out/
-Testing/
+/Testing/
 compile_commands.json
 
 # Local Claude Code instructions

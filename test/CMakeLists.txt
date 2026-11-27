@@ -3,9 +3,8 @@ macro(skye_add_test TESTNAME)
     set(SKYE_TEST_TARGET skye_${TESTNAME})
     # create an executable in which the tests will be stored
     add_executable(${SKYE_TEST_TARGET} ${ARGN})
-    # link the Google test infrastructure, mocking library, and a default main function to
-    # the test executable.  Remove g_test_main if writing your own main function.
-    target_link_libraries(${SKYE_TEST_TARGET} gtest gmock gtest_main skye)
+    # skye::testing brings in Skye, googletest and gmock; gtest_main supplies main()
+    target_link_libraries(${SKYE_TEST_TARGET} skye::testing GTest::gtest_main)
     target_compile_features (${SKYE_TEST_TARGET} PRIVATE cxx_std_23)
     # must run before gtest_discover_tests: discovery runs the executable after building
     skye_copy_asan_runtime(${SKYE_TEST_TARGET})

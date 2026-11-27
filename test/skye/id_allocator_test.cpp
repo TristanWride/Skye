@@ -1,7 +1,6 @@
 #include "skye/IDAllocator.hpp"
 #include "skye/Util.hpp"
-
-#include <gtest/gtest.h>
+#include "skye/testing/Testing.hpp"
 
 #include <cstdint>
 #include <string_view>

@@ -1,6 +1,5 @@
 #include "skye/Event.hpp"
-
-#include <gtest/gtest.h>
+#include "skye/testing/Testing.hpp"
 
 #include <atomic>
 #include <chrono>
