@@ -1,6 +1,7 @@
 #include "skye/Entity.hpp"
 #include "skye/Util.hpp"
-#include "skye/testing/Testing.hpp"
+
+#include <gtest/gtest.h>
 
 #include <tuple>
 
