@@ -3,8 +3,20 @@ cmake_minimum_required (VERSION 4.4)
 project (Skye)
 enable_language (CXX)
 
-include (CTest)
-include (GoogleTest)
+option (SKYE_BUILD_TESTS "Build the Skye unit tests" ${PROJECT_IS_TOP_LEVEL})
+option (SKYE_BUILD_EXAMPLES "Build the Skye examples" ${PROJECT_IS_TOP_LEVEL})
+
+if (PROJECT_IS_TOP_LEVEL)
+  include (CTest)
+elseif (SKYE_BUILD_TESTS)
+  # Registers Skye's tests. The consuming project must also call enable_testing() or
+  # include(CTest) in its own root for ctest to find them.
+  enable_testing ()
+endif ()
+
+if (SKYE_BUILD_TESTS)
+  include (GoogleTest)
+endif ()
 
 # MSVC links ASan builds against clang_rt.asan_dynamic-x86_64.dll, which lives next to cl.exe
 # and is not on PATH. Copy it beside the executable in the Asan configuration so the program
@@ -23,6 +35,10 @@ endfunction ()
 
 add_subdirectory (external)
 
-add_subdirectory (examples)
+if (SKYE_BUILD_EXAMPLES)
+  add_subdirectory (examples)
+endif ()
 add_subdirectory (skye)
-add_subdirectory (test)
+if (SKYE_BUILD_TESTS)
+  add_subdirectory (test)
+endif ()
