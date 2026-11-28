@@ -30,7 +30,7 @@ void EventSystem::UnregisterListener( ListenerID listenerID ) {
   listenerIDs_.DestroyID( listenerID );
   listeners_.erase( listenerID );
 
-  // IDs are reused, so a stale channel entry would send events to the next listener given this ID.
+  // A stale channel entry could never match a later listener (it gets a new generation), but would linger forever.
   std::erase_if( channels_, [&]( auto & channel ) {
     std::erase( channel.second, listenerID );
     return channel.second.empty();
@@ -79,7 +79,8 @@ void EventSystem::DispatchEvent( const Event & event ) {
 
 void EventSystem::NotifyListener( ListenerID listenerID, const Event & event ) {
   // Look the listener up again: it may have been unregistered after the event was queued, or by an earlier
-  // recipient's OnEvent during this dispatch.
+  // recipient's OnEvent during this dispatch. listeners_ is keyed by the full ID, generation included, so a stale ID
+  // misses even when its index now belongs to another listener.
   const auto found = listeners_.find( listenerID );
   if ( found == listeners_.end() ) return;
 

@@ -1,4 +1,5 @@
 #include "skye/Event.hpp"
+#include "skye/Util.hpp"
 
 #include <gtest/gtest.h>
 
@@ -135,12 +136,47 @@ TEST( EventSystemTest, ReusedIDDoesNotInheritChannels ) {
   events.UnregisterListener( id );
 
   const EventSystem::ListenerID reusedID = events.RegisterListener( &second );
-  ASSERT_EQ( reusedID, id );
+  ASSERT_EQ( EventSystem::ListenerIDAllocator::IndexOf( reusedID ),
+             EventSystem::ListenerIDAllocator::IndexOf( id ) );
 
   events.QueueEvent( MakeChannelEvent( 7, 3 ) );
   events.ProcessEvents();
 
   EXPECT_TRUE( second.received.empty() );
+}
+
+TEST( EventSystemTest, QueuedEventForStaleIDSkipsListenerReusingIndex ) {
+  auto                          events = EventSystem{};
+  auto                          first  = RecordingListener{};
+  auto                          second = RecordingListener{};
+  const EventSystem::ListenerID id     = events.RegisterListener( &first );
+
+  events.QueueEvent( MakeSingleEvent( 7, id ) );
+  events.UnregisterListener( id );
+  const EventSystem::ListenerID reusedID = events.RegisterListener( &second );
+  ASSERT_NE( reusedID, id );
+  ASSERT_EQ( EventSystem::ListenerIDAllocator::IndexOf( reusedID ),
+             EventSystem::ListenerIDAllocator::IndexOf( id ) );
+
+  events.ProcessEvents();
+
+  EXPECT_TRUE( first.received.empty() );
+  EXPECT_TRUE( second.received.empty() );
+}
+
+TEST( EventSystemTest, UnregisteringStaleIDFails ) {
+  auto                          events = EventSystem{};
+  auto                          first  = RecordingListener{};
+  auto                          second = RecordingListener{};
+  const EventSystem::ListenerID id     = events.RegisterListener( &first );
+  events.UnregisterListener( id );
+  const EventSystem::ListenerID reusedID = events.RegisterListener( &second );
+
+  EXPECT_THROW( events.UnregisterListener( id ), skye::util::Failure );
+
+  events.QueueEvent( MakeSingleEvent( 7, reusedID ) );
+  events.ProcessEvents();
+  EXPECT_EQ( second.received, std::vector<skye::EventType>{ 7 } );
 }
 
 TEST( EventSystemTest, BroadcastGoesOutInListenerIDOrder ) {

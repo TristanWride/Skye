@@ -10,4 +10,8 @@ void EntityRegistry::DestroyEntity( EntityID entityID ) {
   entityIDs_.DestroyID( entityID );
 }
 
+bool EntityRegistry::IsAlive( EntityID entityID ) const noexcept {
+  return entityIDs_.IsAlive( entityID );
+}
+
 }

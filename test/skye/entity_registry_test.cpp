@@ -18,7 +18,10 @@ TEST( EntityRegistryTest, DestroyedIDIsReusedFirst ) {
   std::ignore                 = registry.CreateEntity();
 
   registry.DestroyEntity( second );
-  EXPECT_EQ( registry.CreateEntity(), second );
+  const skye::EntityID recycled = registry.CreateEntity();
+  EXPECT_NE( recycled, second );
+  EXPECT_EQ( skye::EntityRegistry::IndexOf( recycled ), skye::EntityRegistry::IndexOf( second ) );
+  EXPECT_EQ( skye::EntityRegistry::GenerationOf( recycled ), skye::EntityRegistry::GenerationOf( second ) + 1 );
   EXPECT_EQ( registry.CreateEntity(), 3 );
 }
 
@@ -33,7 +36,7 @@ TEST( EntityRegistryTest, DestroyingInactiveEntityFails ) {
 
 TEST( EntityRegistryTest, DestroyingOutOfRangeIDFails ) {
   auto registry = skye::EntityRegistry{};
-  EXPECT_THROW( registry.DestroyEntity( skye::EntityRegistry::MAX_ENTITIES ), skye::util::Failure );
+  EXPECT_THROW( registry.DestroyEntity( skye::EntityRegistry::MAX_ENTITIES - 1 ), skye::util::Failure );
 }
 
 TEST( EntityRegistryTest, CreatingPastLimitFails ) {
@@ -42,4 +45,36 @@ TEST( EntityRegistryTest, CreatingPastLimitFails ) {
     std::ignore = registry.CreateEntity();
 
   EXPECT_THROW( std::ignore = registry.CreateEntity(), skye::util::Failure );
+}
+
+TEST( EntityRegistryTest, IsAliveTracksLifetime ) {
+  auto registry = skye::EntityRegistry{};
+  EXPECT_FALSE( registry.IsAlive( 0 ) );
+
+  const skye::EntityID id = registry.CreateEntity();
+  EXPECT_TRUE( registry.IsAlive( id ) );
+
+  registry.DestroyEntity( id );
+  EXPECT_FALSE( registry.IsAlive( id ) );
+}
+
+TEST( EntityRegistryTest, StaleIDIsNotAliveAfterIndexReuse ) {
+  auto                 registry = skye::EntityRegistry{};
+  const skye::EntityID stale    = registry.CreateEntity();
+  registry.DestroyEntity( stale );
+  const skye::EntityID fresh = registry.CreateEntity();
+
+  EXPECT_EQ( skye::EntityRegistry::IndexOf( fresh ), skye::EntityRegistry::IndexOf( stale ) );
+  EXPECT_TRUE( registry.IsAlive( fresh ) );
+  EXPECT_FALSE( registry.IsAlive( stale ) );
+}
+
+TEST( EntityRegistryTest, DestroyingStaleIDFails ) {
+  auto                 registry = skye::EntityRegistry{};
+  const skye::EntityID stale    = registry.CreateEntity();
+  registry.DestroyEntity( stale );
+  const skye::EntityID fresh = registry.CreateEntity();
+
+  EXPECT_THROW( registry.DestroyEntity( stale ), skye::util::Failure );
+  EXPECT_TRUE( registry.IsAlive( fresh ) );
 }

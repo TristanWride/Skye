@@ -29,6 +29,8 @@ public:
   using size_type  = uint64_t;
   using ListenerID = uint32_t;
   using ChannelID  = uint32_t;
+  // Generational, so a stale listener ID stops matching once its index is reused.
+  using ListenerIDAllocator = IDAllocator<ListenerID, 8>;
 
   struct EventTarget {
     enum class Type : uint8_t {
@@ -57,9 +59,9 @@ public:
 
 private:
   IDAllocator<EventType>                                 eventTypes_{ NULL_EVENT_TYPE + 1 };
-  IDAllocator<ListenerID>                                listenerIDs_{ 1 };
+  ListenerIDAllocator                                    listenerIDs_{ 1 };
   std::deque<Event>                                      eventQueue_{};
-  std::map<ListenerID, Listener *>                       listeners_{}; // Ordered: broadcasts go out in ID order.
+  std::map<ListenerID, Listener *>                       listeners_{}; // Ordered: broadcasts go out in full ID order.
   std::unordered_map<ChannelID, std::vector<ListenerID>> channels_{};
 
 public:
@@ -75,8 +77,10 @@ public:
   // Removes a listener from one channel. An event already being dispatched may still reach it.
   void UnregisterListenerFromChannel( ListenerID listenerID, ChannelID channelID );
 
-  // Removes a listener from every channel and frees its ID for reuse. Once this returns, the listener is never
-  // called again, even by an event that is part-way through being dispatched.
+  // Removes a listener from every channel and frees its ID's index for reuse under a new generation. Once this
+  // returns, the listener is never called again, even by an event that is part-way through being dispatched, and
+  // events still addressed to its ID do not reach a listener that later reuses the index (barring generation
+  // wrap-around after 256 reuses of one index).
   void UnregisterListener( ListenerID listenerID );
 
   // Adds an event to the queue. It is delivered on the next ProcessEvents() call.
