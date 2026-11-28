@@ -7,6 +7,9 @@
     // Fallback for files CMake Tools doesn't know about yet (e.g. a new .cpp before reconfiguring).
     "C_Cpp.default.cppStandard": "c++23",
 
+    // Show tests as a tree in the Test Explorer by splitting names on "." (skye › Suite › Test).
+    "cmake.ctest.testSuiteDelimiter": "\\.",
+
     // Format with the repo's .clang-format, using the clang-format shipped with
     // Visual Studio 2026 (22.x) so the result matches the version STYLE.md was checked with.
     "C_Cpp.formatting": "clangFormat",
