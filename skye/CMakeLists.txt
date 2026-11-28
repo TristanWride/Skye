@@ -1,6 +1,8 @@
 add_library(skye STATIC
+  src/Component.cpp
   src/Entity.cpp
   src/Event.cpp
+  src/SparseSet.cpp
   src/Util.cpp
 )
 add_library(skye::skye ALIAS skye)

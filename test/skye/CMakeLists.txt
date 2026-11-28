@@ -1,3 +1,7 @@
 skye_add_test (entity_registry_test entity_registry_test.cpp)
 skye_add_test (id_allocator_test id_allocator_test.cpp)
 skye_add_test (event_system_test event_system_test.cpp)
+skye_add_test (component_type_test component_type_test.cpp)
+skye_add_test (sparse_set_test sparse_set_test.cpp)
+skye_add_test (entity_component_test entity_component_test.cpp)
+skye_add_test (component_storage_test component_storage_test.cpp)
