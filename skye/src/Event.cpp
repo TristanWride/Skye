@@ -10,20 +10,15 @@ EventType EventSystem::GenerateEventType() {
 
 EventSystem::ListenerID EventSystem::RegisterListener( Listener * listener ) {
   const ListenerID listenerID = listenerIDs_.CreateID();
-
-  auto lock = std::lock_guard{ listenersMutex_ };
   listeners_.emplace( listenerID, listener );
   return listenerID;
 }
 
 void EventSystem::RegisterListenerToChannel( ListenerID listenerID, ChannelID channelID ) {
-  auto lock = std::lock_guard{ listenersMutex_ };
   channels_[channelID].push_back( listenerID );
 }
 
 void EventSystem::UnregisterListenerFromChannel( ListenerID listenerID, ChannelID channelID ) {
-  auto lock = std::lock_guard{ listenersMutex_ };
-
   const auto channel = channels_.find( channelID );
   if ( channel == channels_.end() ) return;
 
@@ -32,10 +27,6 @@ void EventSystem::UnregisterListenerFromChannel( ListenerID listenerID, ChannelI
 }
 
 void EventSystem::UnregisterListener( ListenerID listenerID ) {
-  // Blocks until other threads finish ProcessEvents(), so the caller may destroy the listener afterwards.
-  auto dispatchLock = std::lock_guard{ dispatchMutex_ };
-  auto lock         = std::lock_guard{ listenersMutex_ };
-
   listenerIDs_.DestroyID( listenerID );
   listeners_.erase( listenerID );
 
@@ -47,47 +38,39 @@ void EventSystem::UnregisterListener( ListenerID listenerID ) {
 }
 
 void EventSystem::QueueEvent( Event event ) {
-  auto lock = std::lock_guard{ queueMutex_ };
   eventQueue_.push_back( event );
 }
 
 void EventSystem::ProcessEvents() {
-  auto dispatchLock = std::lock_guard{ dispatchMutex_ };
-
-  // Take the whole queue first, so listeners that queue events from OnEvent can't extend this loop forever.
+  // Take the whole queue first, so listeners that queue events from OnEvent can't extend this loop forever,
+  // and so a nested ProcessEvents() from inside OnEvent can't invalidate this loop's iterators.
   auto events = std::deque<Event>{};
-  {
-    auto lock = std::lock_guard{ queueMutex_ };
-    events.swap( eventQueue_ );
-  }
+  events.swap( eventQueue_ );
 
   for ( const Event & event : events )
     DispatchEvent( event );
 }
 
 void EventSystem::DispatchEvent( const Event & event ) {
-  // Collect recipient IDs under the lock, then call them without it, so OnEvent can use the event system.
+  // Copy the recipient IDs before calling any of them: OnEvent may register or unregister listeners, which
+  // would invalidate iterators into listeners_ or channels_.
   auto recipients = std::vector<ListenerID>{};
-  {
-    auto lock = std::lock_guard{ listenersMutex_ };
+  switch ( event.target.type ) {
+    case EventTarget::Type::Broadcast:
+      recipients.reserve( listeners_.size() );
+      for ( const auto & listener : listeners_ )
+        recipients.push_back( listener.first );
+      break;
 
-    switch ( event.target.type ) {
-      case EventTarget::Type::Broadcast:
-        recipients.reserve( listeners_.size() );
-        for ( const auto & listener : listeners_ )
-          recipients.push_back( listener.first );
-        break;
-
-      case EventTarget::Type::Channel: {
-        const auto channel = channels_.find( event.target.channel.channelID );
-        if ( channel != channels_.end() ) recipients = channel->second;
-        break;
-      }
-
-      case EventTarget::Type::Single:
-        recipients.push_back( event.target.single.listenerID );
-        break;
+    case EventTarget::Type::Channel: {
+      const auto channel = channels_.find( event.target.channel.channelID );
+      if ( channel != channels_.end() ) recipients = channel->second;
+      break;
     }
+
+    case EventTarget::Type::Single:
+      recipients.push_back( event.target.single.listenerID );
+      break;
   }
 
   for ( const ListenerID listenerID : recipients )
@@ -95,18 +78,12 @@ void EventSystem::DispatchEvent( const Event & event ) {
 }
 
 void EventSystem::NotifyListener( ListenerID listenerID, const Event & event ) {
-  Listener * listener = nullptr;
-  {
-    auto lock = std::lock_guard{ listenersMutex_ };
+  // Look the listener up again: it may have been unregistered after the event was queued, or by an earlier
+  // recipient's OnEvent during this dispatch.
+  const auto found = listeners_.find( listenerID );
+  if ( found == listeners_.end() ) return;
 
-    // The listener may have been unregistered after the event was queued.
-    const auto found = listeners_.find( listenerID );
-    if ( found == listeners_.end() ) return;
-    listener = found->second;
-  }
-
-  // Safe to call unlocked: UnregisterListener() can't complete while we hold dispatchMutex_.
-  listener->OnEvent( event.eventType, event.target.payload );
+  found->second->OnEvent( event.eventType, event.target.payload );
 }
 
 }

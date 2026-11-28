@@ -2,10 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include <atomic>
-#include <chrono>
 #include <functional>
-#include <thread>
 #include <tuple>
 #include <vector>
 
@@ -173,83 +170,4 @@ TEST( EventSystemTest, ListenerCanUnregisterItselfDuringOnEvent ) {
   events.ProcessEvents();
 
   EXPECT_EQ( listener.received, std::vector<skye::EventType>{ 7 } );
-}
-
-TEST( EventSystemTest, ConcurrentQueueingDeliversEveryEvent ) {
-  constexpr int PRODUCERS           = 8;
-  constexpr int EVENTS_PER_PRODUCER = 1000;
-
-  auto events   = EventSystem{};
-  auto listener = RecordingListener{};
-  std::ignore   = events.RegisterListener( &listener );
-
-  {
-    auto producers = std::vector<std::jthread>{};
-    for ( int p = 0; p < PRODUCERS; ++p ) {
-      producers.emplace_back( [&] {
-        for ( int i = 0; i < EVENTS_PER_PRODUCER; ++i )
-          events.QueueEvent( MakeBroadcast( 1 ) );
-      } );
-    }
-
-    // Process concurrently with the producers.
-    for ( int i = 0; i < 100; ++i )
-      events.ProcessEvents();
-  }
-  events.ProcessEvents();
-
-  EXPECT_EQ( listener.received.size(), static_cast<size_t>( PRODUCERS * EVENTS_PER_PRODUCER ) );
-}
-
-TEST( EventSystemTest, UnregisterWaitsForInFlightCallback ) {
-  auto events      = EventSystem{};
-  auto listener    = RecordingListener{};
-  auto started     = std::atomic<bool>{ false };
-  auto finished    = std::atomic<bool>{ false };
-  listener.onEvent = [&]( skye::EventType ) {
-    started = true;
-    std::this_thread::sleep_for( std::chrono::milliseconds{ 50 } );
-    finished = true;
-  };
-  const EventSystem::ListenerID id = events.RegisterListener( &listener );
-  events.QueueEvent( MakeSingleEvent( 7, id ) );
-
-  auto processor = std::jthread{ [&] { events.ProcessEvents(); } };
-  while ( !started )
-    std::this_thread::yield();
-
-  events.UnregisterListener( id );
-  EXPECT_TRUE( finished );
-}
-
-TEST( EventSystemTest, ConcurrentRegistrationWhileProcessing ) {
-  auto events = EventSystem{};
-  auto done   = std::atomic<bool>{ false };
-
-  auto processor = std::jthread{ [&] {
-    while ( !done ) {
-      events.QueueEvent( MakeBroadcast( 1 ) );
-      events.QueueEvent( MakeChannelEvent( 2, 5 ) );
-      events.ProcessEvents();
-    }
-  } };
-
-  {
-    auto workers = std::vector<std::jthread>{};
-    for ( int w = 0; w < 4; ++w ) {
-      workers.emplace_back( [&] {
-        for ( int i = 0; i < 500; ++i ) {
-          auto                          listener = RecordingListener{};
-          const EventSystem::ListenerID id       = events.RegisterListener( &listener );
-          events.RegisterListenerToChannel( id, 5 );
-          events.UnregisterListenerFromChannel( id, 5 );
-          events.RegisterListenerToChannel( id, 5 );
-          // After this returns the listener must never be called again, so destroying it is safe.
-          events.UnregisterListener( id );
-        }
-      } );
-    }
-  }
-
-  done = true;
 }

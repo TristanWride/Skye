@@ -5,12 +5,12 @@
 #include <concepts>
 #include <cstdint>
 #include <limits>
-#include <mutex>
 #include <vector>
 
 namespace skye {
 
-// Hands out IDs in [firstID, maxIDs), reusing the most recently destroyed ID first. Thread-safe.
+// Hands out IDs in [firstID, maxIDs), reusing the most recently destroyed ID first.
+// Not thread-safe: callers that share one across threads must synchronise access themselves.
 template <std::unsigned_integral IntType>
 class IDAllocator {
 public:
@@ -25,7 +25,6 @@ public:
   static constexpr size_type MAX_IDS = std::numeric_limits<IntType>::max();
 
 private:
-  std::mutex         mutex_;
   std::vector<Entry> entries_;
   IntType            firstFreeID_;
   size_type          maxIDs_;
@@ -43,8 +42,6 @@ public:
 
   // Returns a new ID, reusing the most recently destroyed ID first.
   [[nodiscard]] IntType CreateID() {
-    auto lock = std::lock_guard{ mutex_ };
-
     const IntType newID = firstFreeID_;
     if ( newID >= maxIDs_ )
       util::Fail( "Maximum number of IDs ({}) reached.", maxIDs_ );
@@ -62,8 +59,6 @@ public:
 
   // Frees an active ID for reuse.
   void DestroyID( IntType id ) {
-    auto lock = std::lock_guard{ mutex_ };
-
     if ( id >= entries_.size() )
       util::Fail( "ID {:d} has never been allocated.", id );
 
